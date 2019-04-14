@@ -7,25 +7,27 @@ using FlaxEngine.GUI;
 
 namespace MultiUsersEditingPlugin
 {
-    public class JoinSessionWindow : CustomEditorWindow
-    {
-        private TextBoxElement IPTextbox;
-        private TextBoxElement PortTextBox;
-        
-        public override void Initialize(LayoutElementsContainer layout)
-        {
-            layout.Label("Joining Session", TextAlignment.Center);
-            layout.Space(20);
-            IPTextbox = layout.TextBox();
-            PortTextBox = layout.TextBox();
-            var button = layout.Button("Join");
-            button.Button.Clicked += OnButtonClicked;
-        }
-        
-        private void OnButtonClicked()
-        {
-            EditingSessionPlugin.GetInstance().EditingSession = new ClientSession();
-            EditingSessionPlugin.GetInstance().EditingSession.Start(IPTextbox.Text, Int32.Parse(PortTextBox.Text));
-        }
-    }
+	public class JoinSessionWindow : CustomEditorWindow
+	{
+		private SessionSettings ClientSettings = new SessionSettings();
+
+		public override void Initialize(LayoutElementsContainer layout)
+		{
+			layout.Label("Joining Session", TextAlignment.Center);
+			layout.Space(20);
+
+			var clientSettingsEditor = new CustomEditorPresenter(null);
+			clientSettingsEditor.Panel.Parent = layout.ContainerControl;
+			clientSettingsEditor.Select(ClientSettings);
+
+			var button = layout.Button("Join");
+			button.Button.Clicked += OnButtonClicked;
+		}
+
+		private void OnButtonClicked()
+		{
+			EditingSessionPlugin.GetInstance().EditingSession = new ClientSession();
+			EditingSessionPlugin.GetInstance().EditingSession.Start(ClientSettings);
+		}
+	}
 }

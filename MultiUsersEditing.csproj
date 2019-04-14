@@ -58,6 +58,7 @@
     <Compile Include="Source\MultiUsersEditingPlugin\Packet.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\PacketTypeManager.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\ServerSession.cs" />
+    <Compile Include="Source\MultiUsersEditingPlugin\SessionSettings.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\TestPacket.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\TransformObjectPacket.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Windows\HostSessionWindow.cs" />

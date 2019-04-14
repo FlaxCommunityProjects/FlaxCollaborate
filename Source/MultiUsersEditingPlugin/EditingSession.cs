@@ -1,11 +1,16 @@
 using System;
+using MultiUsersEditingPlugin;
 
 namespace MultiUsersEditingPlugin
 {
-    public abstract class EditingSession
-    {
-        public bool IsHosting { protected set; get; }
-        public abstract bool Start(String host, int port);
-        public abstract bool SendPacket(Packet packet);
-    }
+	public interface EditingSession
+	{
+		bool IsHosting { get; }
+
+		bool Start(SessionSettings settings);
+
+		bool SendPacket(Packet packet);
+
+		void Close();
+	}
 }
