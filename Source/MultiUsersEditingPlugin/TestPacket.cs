@@ -1,7 +1,8 @@
 using System;
 using System.IO;
+using FlaxEngine;
 
-namespace MultiUsersEditingPlugin.MultiUsersEditingPlugin
+namespace MultiUsersEditingPlugin
 {
     public class TestPacket : Packet
     {
@@ -20,7 +21,7 @@ namespace MultiUsersEditingPlugin.MultiUsersEditingPlugin
         public override void Read(BinaryReader bs)
         {
             Message = bs.ReadString();
-            Console.WriteLine(Message);
+            Debug.Log(Message);
         }
 
         public override void Write(BinaryWriter bw)

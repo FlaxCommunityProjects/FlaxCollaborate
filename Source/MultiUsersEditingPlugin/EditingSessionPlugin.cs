@@ -15,7 +15,8 @@ namespace MultiUsersEditingPlugin
         public override void InitializeEditor()
         {
             base.InitializeEditor();
-
+            Instance = this;
+            
             mainButton = Editor.UI.MainMenu.GetButton("Tools").ContextMenu.GetOrAddChildMenu("Collaborate");
             hostButton = mainButton.ContextMenu.AddButton("Host session");
             hostButton.Clicked += OnHostClick;
@@ -37,6 +38,14 @@ namespace MultiUsersEditingPlugin
         public void OnJoinClick()
         {
             new JoinSessionWindow().Show();
+        }
+
+
+        private static EditingSessionPlugin Instance;
+        
+        public static EditingSessionPlugin GetInstance()
+        {
+            return Instance;
         }
     }
 }

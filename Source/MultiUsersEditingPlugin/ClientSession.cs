@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using FlaxEngine;
 using Microsoft.VisualBasic;
 
 namespace MultiUsersEditingPlugin
@@ -38,8 +39,7 @@ namespace MultiUsersEditingPlugin
             }
             catch (Exception e)
             {
-                //Debug.LogError(e.ToString());
-                Console.WriteLine(e);
+                Debug.LogError(e.ToString());
                 return false;
             }
             
@@ -76,8 +76,7 @@ namespace MultiUsersEditingPlugin
                 }
                 catch (Exception e)
                 {
-                    //Debug.LogError(e.ToString());
-                    Console.WriteLine(e);
+                    Debug.LogError(e.ToString());
                     return false;
                 }
 

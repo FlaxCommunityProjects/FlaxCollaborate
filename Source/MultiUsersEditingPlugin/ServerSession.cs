@@ -5,8 +5,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using FlaxEngine;
 
-namespace MultiUsersEditingPlugin.MultiUsersEditingPlugin
+namespace MultiUsersEditingPlugin
 {
     public class ServerSession : EditingSession
     {
@@ -81,8 +82,7 @@ namespace MultiUsersEditingPlugin.MultiUsersEditingPlugin
             }
             catch (Exception e)
             {
-                //Debug.LogError(e.ToString());
-                Console.WriteLine(e);
+                Debug.LogError(e.ToString());
                 return false;
             }
 
@@ -107,8 +107,7 @@ namespace MultiUsersEditingPlugin.MultiUsersEditingPlugin
                         }
                         catch (Exception e)
                         {
-                            //Debug.LogError(e.ToString());
-                            Console.WriteLine(e);
+                            Debug.LogError(e.ToString());
                             return false;
                         }
                     }

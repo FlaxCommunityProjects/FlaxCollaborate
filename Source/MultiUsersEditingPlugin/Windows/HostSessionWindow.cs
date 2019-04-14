@@ -1,3 +1,4 @@
+using System;
 using FlaxEditor;
 using FlaxEditor.CustomEditors;
 using FlaxEditor.CustomEditors.Elements;
@@ -14,7 +15,6 @@ namespace MultiUsersEditingPlugin
         {
             layout.Label("Hosting Session", TextAlignment.Center);
             layout.Space(20);
-            layout.CustomContainer<GroupElement>();
             PortTextBox = layout.TextBox();
             PortTextBox.TextBox.DockStyle = DockStyle.None;
             PortTextBox.TextBox.AnchorStyle = AnchorStyle.Center;
@@ -26,7 +26,8 @@ namespace MultiUsersEditingPlugin
         
         private void OnButtonClicked()
         {
-            
+            EditingSessionPlugin.GetInstance().EditingSession = new ServerSession();
+            EditingSessionPlugin.GetInstance().EditingSession.Start("", Int32.Parse(PortTextBox.Text));
         }
     }
 }
