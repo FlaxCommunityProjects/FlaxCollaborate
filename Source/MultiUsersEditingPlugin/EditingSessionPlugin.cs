@@ -22,6 +22,19 @@ namespace MultiUsersEditingPlugin
             hostButton.Clicked += OnHostClick;
             joinButton = mainButton.ContextMenu.AddButton("Join session");
             joinButton.Clicked += OnJoinClick;
+            
+            Editor.Undo.ActionDone += delegate(IUndoAction action)
+            {
+                if (EditingSession == null)
+                    return;
+                
+                if ((action as TransformObjectsAction) != null)
+                {
+                    var transAction = (TransformObjectsAction) action;
+                    Packet p = new TransformObjectPacket(transAction.Data.Selection[0].ID, transAction.Data.After[0].Translation);
+                    EditingSession.SendPacket(p);
+                }
+            };
         }
 
         public override void Deinitialize()

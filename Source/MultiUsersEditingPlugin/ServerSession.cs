@@ -46,6 +46,7 @@ namespace MultiUsersEditingPlugin
                                     Clients[i].Socket = Server.AcceptTcpClient();
                                     Clients[i].Reader = new BinaryReader(Clients[i].Socket.GetStream());
                                     Clients[i].Writer = new BinaryWriter(Clients[i].Socket.GetStream());
+                                    Debug.Log("New user connected !");
                                     break;
                                 }
                             }
@@ -63,9 +64,10 @@ namespace MultiUsersEditingPlugin
                             else if (Clients[i].Socket.Available != 0)
                             {
                                 bool broadcasted = Clients[i].Reader.ReadBoolean();
-                                String s = Clients[i].Reader.ReadString();
+                                String classname = Clients[i].Reader.ReadString();
+                                Debug.Log("Incoming packet type : " + classname);
                                 Packet p = (Packet) Activator.CreateInstance(
-                                    PacketTypeManager.subclassTypes.First((t) => t.Name.Equals(s)));
+                                    PacketTypeManager.subclassTypes.First((t) => t.Name.Equals(classname)));
                                 p.Author = Clients[i].Socket.GetHashCode();
                                 p.Read(Clients[i].Reader);
 
@@ -74,11 +76,18 @@ namespace MultiUsersEditingPlugin
                                     ThreadPool.QueueUserWorkItem((state) => { SendPacket(p); });
                                 }
                             }
+                            else
+                            {
+                                Thread.Yield();
+                            }
                         }
                     }
                 });
 
+                Thread.IsBackground = true;
                 Thread.Start();
+                
+                Debug.Log("Session server launched !");
             }
             catch (Exception e)
             {

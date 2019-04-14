@@ -26,9 +26,6 @@ namespace MultiUsersEditingPlugin
         {
             EditingSessionPlugin.GetInstance().EditingSession = new ClientSession();
             EditingSessionPlugin.GetInstance().EditingSession.Start(IPTextbox.Text, Int32.Parse(PortTextBox.Text));
-            
-            Packet p = new TestPacket("Salut");
-            EditingSessionPlugin.GetInstance().EditingSession.SendPacket(p);
         }
     }
 }

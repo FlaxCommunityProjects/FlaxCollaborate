@@ -52,7 +52,6 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Source\MultiUsersEditingPlugin\ActorPositionPacket.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\ClientSession.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\EditingSession.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\EditingSessionPlugin.cs" />
@@ -60,6 +59,7 @@
     <Compile Include="Source\MultiUsersEditingPlugin\PacketTypeManager.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\ServerSession.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\TestPacket.cs" />
+    <Compile Include="Source\MultiUsersEditingPlugin\TransformObjectPacket.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Windows\HostSessionWindow.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Windows\JoinSessionWindow.cs" />
     <Compile Include="Cache\AssemblyInfo.cs" />

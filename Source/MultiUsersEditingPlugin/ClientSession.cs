@@ -35,7 +35,9 @@ namespace MultiUsersEditingPlugin
                 Reader = new BinaryReader(Stream);
                 
                 Thread = new Thread(ReceiveLoop);
+                Thread.IsBackground = true;
                 Thread.Start();
+                Debug.Log("Session client launched !");
             }
             catch (Exception e)
             {
@@ -60,6 +62,10 @@ namespace MultiUsersEditingPlugin
                     String s = Reader.ReadString();
                     Packet p = (Packet) Activator.CreateInstance(PacketTypeManager.subclassTypes.First((t) => t.Name.Equals(s)));
                     p.Read(Reader);
+                }
+                else
+                {
+                    Thread.Yield();
                 }
             }
         }
