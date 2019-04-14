@@ -10,8 +10,7 @@ namespace MultiUsersEditingPlugin
 {
 	public class HostSessionWindow : CustomEditorWindow
 	{
-		private TextBoxElement PortTextBox;
-		private ServerSessionSettings ServerSettings = new ServerSessionSettings();
+		private ServerSessionSettings serverSettings = new ServerSessionSettings();
 
 		public override void Initialize(LayoutElementsContainer layout)
 		{
@@ -20,7 +19,7 @@ namespace MultiUsersEditingPlugin
 
 			var serverSettingsEditor = new CustomEditorPresenter(null);
 			serverSettingsEditor.Panel.Parent = layout.ContainerControl;
-			serverSettingsEditor.Select(ServerSettings);
+			serverSettingsEditor.Select(serverSettings);
 
 			var button = layout.Button("Host");
 			button.Button.Clicked += OnButtonClicked;
@@ -29,7 +28,7 @@ namespace MultiUsersEditingPlugin
 		private void OnButtonClicked()
 		{
 			EditingSessionPlugin.GetInstance().EditingSession = new ServerSession();
-			EditingSessionPlugin.GetInstance().EditingSession.Start(ServerSettings);
+			EditingSessionPlugin.GetInstance().EditingSession.Start(serverSettings);
 		}
 	}
 }

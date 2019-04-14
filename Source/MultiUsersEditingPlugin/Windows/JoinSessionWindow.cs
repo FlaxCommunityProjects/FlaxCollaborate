@@ -9,7 +9,7 @@ namespace MultiUsersEditingPlugin
 {
 	public class JoinSessionWindow : CustomEditorWindow
 	{
-		private SessionSettings ClientSettings = new SessionSettings();
+		private SessionSettings clientSettings = new SessionSettings();
 
 		public override void Initialize(LayoutElementsContainer layout)
 		{
@@ -18,7 +18,7 @@ namespace MultiUsersEditingPlugin
 
 			var clientSettingsEditor = new CustomEditorPresenter(null);
 			clientSettingsEditor.Panel.Parent = layout.ContainerControl;
-			clientSettingsEditor.Select(ClientSettings);
+			clientSettingsEditor.Select(clientSettings);
 
 			var button = layout.Button("Join");
 			button.Button.Clicked += OnButtonClicked;
@@ -27,7 +27,7 @@ namespace MultiUsersEditingPlugin
 		private void OnButtonClicked()
 		{
 			EditingSessionPlugin.GetInstance().EditingSession = new ClientSession();
-			EditingSessionPlugin.GetInstance().EditingSession.Start(ClientSettings);
+			EditingSessionPlugin.GetInstance().EditingSession.Start(clientSettings);
 		}
 	}
 }
