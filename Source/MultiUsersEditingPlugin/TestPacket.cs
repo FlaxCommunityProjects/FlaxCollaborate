@@ -6,13 +6,13 @@ namespace MultiUsersEditingPlugin
 {
     public class TestPacket : Packet
     {
-        public String Message;
-        
+        public string Message;
+
         public TestPacket()
         {
         }
-        
-        public TestPacket(String msg)
+
+        public TestPacket(string msg)
         {
             Message = msg;
             IsBroadcasted = true;

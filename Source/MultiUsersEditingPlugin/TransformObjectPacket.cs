@@ -15,13 +15,13 @@ namespace MultiUsersEditingPlugin
         public TransformObjectPacket()
         {
         }
-        
+
         public TransformObjectPacket(Guid guid, Vector3 position)
         {
             Guid = guid;
             Position = position;
         }
-        
+
         public override void Read(BinaryReader bs)
         {
             Guid = Guid.Parse(bs.ReadString());
@@ -30,7 +30,7 @@ namespace MultiUsersEditingPlugin
             Position.Z = bs.ReadSingle();
 
             SceneGraphNode node = SceneGraphFactory.FindNode(Guid);
-            
+
             if (node != null)
             {
                 var trans = node.Transform;

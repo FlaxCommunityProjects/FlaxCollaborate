@@ -9,127 +9,127 @@ using FlaxEngine;
 
 namespace MultiUsersEditingPlugin
 {
-	public class ServerSession : IEditingSession
-	{
-		private struct Client
-		{
-			public TcpClient Socket;
-			public BinaryReader Reader;
-			public BinaryWriter Writer;
-		}
+    public class ServerSession : IEditingSession
+    {
+        private struct Client
+        {
+            public TcpClient Socket;
+            public BinaryReader Reader;
+            public BinaryWriter Writer;
+        }
 
-		private bool Running;
-		private TcpListener Server;
-		private IPAddress Address = IPAddress.Parse("127.0.0.1");
-		private Client[] Clients = new Client[10];
-		private Thread Thread;
+        private bool _running;
+        private TcpListener _server;
+        private IPAddress _address = IPAddress.Parse("127.0.0.1");
+        private Client[] _clients = new Client[10];
+        private Thread _thread;
 
-		public bool IsHosting => true;
+        public bool IsHosting => true;
 
-		public bool Start(SessionSettings settings)
-		{
-			try
-			{
-				Server = new TcpListener(Address, settings.Port);
-				Server.Start();
+        public bool Start(SessionSettings settings)
+        {
+            try
+            {
+                _server = new TcpListener(_address, settings.Port);
+                _server.Start();
 
-				Thread = new Thread(() =>
-				{
-					Running = true;
-					while (Running)
-					{
-						if (Server.Pending())
-						{
-							for (int i = 0; i < Clients.Length; i++)
-							{
-								if (Clients[i].Socket == null)
-								{
-									Clients[i].Socket = Server.AcceptTcpClient();
-									Clients[i].Reader = new BinaryReader(Clients[i].Socket.GetStream());
-									Clients[i].Writer = new BinaryWriter(Clients[i].Socket.GetStream());
-									Debug.Log("New user connected !");
-									break;
-								}
-							}
-						}
+                _thread = new Thread(() =>
+                {
+                    _running = true;
+                    while (_running)
+                    {
+                        if (_server.Pending())
+                        {
+                            for (int i = 0; i < _clients.Length; i++)
+                            {
+                                if (_clients[i].Socket == null)
+                                {
+                                    _clients[i].Socket = _server.AcceptTcpClient();
+                                    _clients[i].Reader = new BinaryReader(_clients[i].Socket.GetStream());
+                                    _clients[i].Writer = new BinaryWriter(_clients[i].Socket.GetStream());
+                                    Debug.Log("New user connected !");
+                                    break;
+                                }
+                            }
+                        }
 
-						for (int i = 0; i < Clients.Length; i++)
-						{
-							if (Clients[i].Socket == null)
-							{
-							}
-							else if (!Clients[i].Socket.Connected)
-							{
-								Clients[i].Socket = null;
-							}
-							else if (Clients[i].Socket.Available != 0)
-							{
-								bool broadcasted = Clients[i].Reader.ReadBoolean();
-								String classname = Clients[i].Reader.ReadString();
-								Debug.Log("Incoming packet type : " + classname);
-								Packet p = (Packet)Activator.CreateInstance(
-									PacketTypeManager.subclassTypes.First((t) => t.Name.Equals(classname)));
-								p.Author = Clients[i].Socket.GetHashCode();
-								p.Read(Clients[i].Reader);
+                        for (int i = 0; i < _clients.Length; i++)
+                        {
+                            if (_clients[i].Socket == null)
+                            {
+                            }
+                            else if (!_clients[i].Socket.Connected)
+                            {
+                                _clients[i].Socket = null;
+                            }
+                            else if (_clients[i].Socket.Available != 0)
+                            {
+                                bool broadcasted = _clients[i].Reader.ReadBoolean();
+                                String classname = _clients[i].Reader.ReadString();
+                                Debug.Log("Incoming packet type : " + classname);
+                                Packet p = (Packet)Activator.CreateInstance(
+                                    PacketTypeManager.SubclassTypes.First((t) => t.Name.Equals(classname)));
+                                p.Author = _clients[i].Socket.GetHashCode();
+                                p.Read(_clients[i].Reader);
 
-								if (broadcasted)
-								{
-									ThreadPool.QueueUserWorkItem((state) => { SendPacket(p); });
-								}
-							}
-							else
-							{
-								Thread.Yield();
-							}
-						}
-					}
-				});
+                                if (broadcasted)
+                                {
+                                    ThreadPool.QueueUserWorkItem((state) => { SendPacket(p); });
+                                }
+                            }
+                            else
+                            {
+                                Thread.Yield();
+                            }
+                        }
+                    }
+                });
 
-				Thread.IsBackground = true;
-				Thread.Start();
+                _thread.IsBackground = true;
+                _thread.Start();
 
-				Debug.Log("Session server launched !");
-			}
-			catch (Exception e)
-			{
-				Debug.LogError(e.ToString());
-				return false;
-			}
+                Debug.Log("Session server launched !");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e.ToString());
+                return false;
+            }
 
-			return true;
-		}
+            return true;
+        }
 
-		public bool SendPacket(Packet packet)
-		{
-			String s = PacketTypeManager.subclassTypes.First(t => packet.GetType().IsEquivalentTo(t)).Name;
+        public bool SendPacket(Packet packet)
+        {
+            string s = PacketTypeManager.SubclassTypes.First(t => packet.GetType().IsEquivalentTo(t)).Name;
 
-			foreach (var client in Clients)
-			{
-				if (client.Socket != null &&
-					client.Socket.GetHashCode() != packet.Author)
-				{
-					lock (client.Socket)
-					{
-						try
-						{
-							client.Writer.Write(s);
-							packet.Write(client.Writer);
-						}
-						catch (Exception e)
-						{
-							Debug.LogError(e.ToString());
-							return false;
-						}
-					}
-				}
-			}
+            foreach (var client in _clients)
+            {
+                if (client.Socket != null &&
+                    client.Socket.GetHashCode() != packet.Author)
+                {
+                    lock (client.Socket)
+                    {
+                        try
+                        {
+                            client.Writer.Write(s);
+                            packet.Write(client.Writer);
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogError(e.ToString());
+                            return false;
+                        }
+                    }
+                }
+            }
 
-			return true;
-		}
+            return true;
+        }
 
-		public void Close()
-		{
-			Running = false;
-		}
-	}
+        public void Close()
+        {
+            _running = false;
+        }
+    }
 }
