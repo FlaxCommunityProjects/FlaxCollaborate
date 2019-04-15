@@ -9,7 +9,7 @@ using FlaxEngine;
 
 namespace MultiUsersEditingPlugin
 {
-	public class ServerSession : EditingSession
+	public class ServerSession : IEditingSession
 	{
 		private struct Client
 		{

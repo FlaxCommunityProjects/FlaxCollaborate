@@ -9,7 +9,7 @@ using Microsoft.VisualBasic;
 
 namespace MultiUsersEditingPlugin
 {
-	public class ClientSession : EditingSession
+	public class ClientSession : IEditingSession
 	{
 		private TcpClient Socket;
 		private NetworkStream Stream;

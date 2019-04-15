@@ -6,7 +6,7 @@ namespace MultiUsersEditingPlugin
 {
 	public class EditingSessionPlugin : EditorPlugin
 	{
-		public EditingSession EditingSession;
+		public IEditingSession EditingSession;
 
 		private ContextMenuChildMenu mainButton;
 		private ContextMenuButton hostButton;

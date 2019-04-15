@@ -3,7 +3,7 @@ using MultiUsersEditingPlugin;
 
 namespace MultiUsersEditingPlugin
 {
-	public interface EditingSession
+	public interface IEditingSession
 	{
 		bool IsHosting { get; }
 
