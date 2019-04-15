@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Source\MultiUsersEditingPlugin\ClientSession.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\EditingSessionPlugin.cs" />
+    <Compile Include="Source\MultiUsersEditingPlugin\GenericUndoActionPacket.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\IEditingSession.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Packet.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\PacketTypeManager.cs" />
