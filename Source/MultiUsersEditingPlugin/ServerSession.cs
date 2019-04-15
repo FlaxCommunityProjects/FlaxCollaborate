@@ -65,7 +65,7 @@ namespace MultiUsersEditingPlugin
                             else if (_clients[i].Socket.Available != 0)
                             {
                                 bool broadcasted = _clients[i].Reader.ReadBoolean();
-                                String classname = _clients[i].Reader.ReadString();
+                                string classname = _clients[i].Reader.ReadString();
                                 Debug.Log("Incoming packet type : " + classname);
                                 Packet p = (Packet)Activator.CreateInstance(
                                     PacketTypeManager.SubclassTypes.First((t) => t.Name.Equals(classname)));
@@ -130,6 +130,11 @@ namespace MultiUsersEditingPlugin
         public void Close()
         {
             _running = false;
+            _server.Stop();
+            foreach (var client in _clients)
+            {
+                client.Socket.Close();
+            }
         }
     }
 }
