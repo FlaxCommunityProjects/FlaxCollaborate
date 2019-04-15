@@ -7,10 +7,9 @@ namespace MultiUsersEditingPlugin
 {
     public class PacketTypeManager
     {
-        public static IEnumerable<Type> subclassTypes = Assembly
+        public static IEnumerable<Type> SubclassTypes = Assembly
             .GetAssembly(typeof(Packet))
             .GetTypes()
             .Where(t => t.IsSubclassOf(typeof(Packet)));
-        
     }
 }

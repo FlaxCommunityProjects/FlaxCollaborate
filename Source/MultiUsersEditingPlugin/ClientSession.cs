@@ -9,95 +9,95 @@ using Microsoft.VisualBasic;
 
 namespace MultiUsersEditingPlugin
 {
-	public class ClientSession : EditingSession
-	{
-		private TcpClient Socket;
-		private NetworkStream Stream;
-		private BinaryReader Reader;
-		private BinaryWriter Writer;
-		private Thread Thread;
-		private bool Running;
+    public class ClientSession : IEditingSession
+    {
+        private TcpClient _socket;
+        private NetworkStream _stream;
+        private BinaryReader _reader;
+        private BinaryWriter _writer;
+        private Thread _thread;
+        private bool _running;
 
-		public bool IsHosting => false;
+        public bool IsHosting => false;
 
-		public bool Start(SessionSettings settings)
-		{
-			try
-			{
-				if (Socket != null && Socket.Connected)
-				{
-					Socket.Close();
-					Stream.Close();
-				}
+        public bool Start(SessionSettings settings)
+        {
+            try
+            {
+                if (_socket != null && _socket.Connected)
+                {
+                    _socket.Close();
+                    _stream.Close();
+                }
 
-				Socket = new TcpClient(settings.Host, settings.Port);
-				Stream = Socket.GetStream();
-				Writer = new BinaryWriter(Stream);
-				Reader = new BinaryReader(Stream);
+                _socket = new TcpClient(settings.Host, settings.Port);
+                _stream = _socket.GetStream();
+                _writer = new BinaryWriter(_stream);
+                _reader = new BinaryReader(_stream);
 
-				Thread = new Thread(ReceiveLoop);
-				Thread.IsBackground = true;
-				Thread.Start();
-				Debug.Log("Session client launched !");
-			}
-			catch (Exception e)
-			{
-				Debug.LogError(e.ToString());
-				return false;
-			}
+                _thread = new Thread(ReceiveLoop);
+                _thread.IsBackground = true;
+                _thread.Start();
+                Debug.Log("Session client launched !");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e.ToString());
+                return false;
+            }
 
-			return true;
-		}
+            return true;
+        }
 
-		private void ReceiveLoop()
-		{
-			Running = true;
-			while (Running)
-			{
-				if (!Socket.Connected)
-				{
-					Running = false;
-				}
-				else if (Socket.Available != 0)
-				{
-					String s = Reader.ReadString();
-					Packet p = (Packet)Activator.CreateInstance(PacketTypeManager.subclassTypes.First((t) => t.Name.Equals(s)));
-					p.Read(Reader);
-				}
-				else
-				{
-					Thread.Yield();
-				}
-			}
-		}
+        private void ReceiveLoop()
+        {
+            _running = true;
+            while (_running)
+            {
+                if (!_socket.Connected)
+                {
+                    _running = false;
+                }
+                else if (_socket.Available != 0)
+                {
+                    String s = _reader.ReadString();
+                    Packet p = (Packet)Activator.CreateInstance(PacketTypeManager.SubclassTypes.First((t) => t.Name.Equals(s)));
+                    p.Read(_reader);
+                }
+                else
+                {
+                    Thread.Yield();
+                }
+            }
+        }
 
-		public bool SendPacket(Packet packet)
-		{
-			lock (this)
-			{
-				try
-				{
-					Writer.Write(packet.IsBroadcasted);
-					Writer.Write(PacketTypeManager.subclassTypes.First(t => packet.GetType().IsEquivalentTo(t)).Name);
-					packet.Write(Writer);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError(e.ToString());
-					return false;
-				}
+        public bool SendPacket(Packet packet)
+        {
+            lock (this)
+            {
+                try
+                {
+                    _writer.Write(packet.IsBroadcasted);
+                    _writer.Write(PacketTypeManager.SubclassTypes.First(t => packet.GetType().IsEquivalentTo(t)).Name);
+                    packet.Write(_writer);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.ToString());
+                    return false;
+                }
 
-				return true;
-			}
-		}
+                return true;
+            }
+        }
 
-		public void Close()
-		{
-			Running = false;
-			Writer.Close();
-			Reader.Close();
-			Socket.Close();
-			Stream.Close();
-		}
-	}
+        public void Close()
+        {
+            _running = false;
+            _writer.Close();
+            _reader.Close();
+            _socket.Close();
+            _stream.Close();
+        }
+    }
 }

@@ -8,27 +8,27 @@ using FlaxEngine.GUI;
 
 namespace MultiUsersEditingPlugin
 {
-	public class HostSessionWindow : CustomEditorWindow
-	{
-		private ServerSessionSettings serverSettings = new ServerSessionSettings();
+    public class HostSessionWindow : CustomEditorWindow
+    {
+        private ServerSessionSettings _serverSettings = new ServerSessionSettings();
 
-		public override void Initialize(LayoutElementsContainer layout)
-		{
-			layout.Label("Hosting Session", TextAlignment.Center);
-			layout.Space(20);
+        public override void Initialize(LayoutElementsContainer layout)
+        {
+            layout.Label("Hosting Session", TextAlignment.Center);
+            layout.Space(20);
 
-			var serverSettingsEditor = new CustomEditorPresenter(null);
-			serverSettingsEditor.Panel.Parent = layout.ContainerControl;
-			serverSettingsEditor.Select(serverSettings);
+            var serverSettingsEditor = new CustomEditorPresenter(null);
+            serverSettingsEditor.Panel.Parent = layout.ContainerControl;
+            serverSettingsEditor.Select(_serverSettings);
 
-			var button = layout.Button("Host");
-			button.Button.Clicked += OnButtonClicked;
-		}
+            var button = layout.Button("Host");
+            button.Button.Clicked += OnButtonClicked;
+        }
 
-		private void OnButtonClicked()
-		{
-			EditingSessionPlugin.GetInstance().EditingSession = new ServerSession();
-			EditingSessionPlugin.GetInstance().EditingSession.Start(serverSettings);
-		}
-	}
+        private void OnButtonClicked()
+        {
+            EditingSessionPlugin.GetInstance().EditingSession = new ServerSession();
+            EditingSessionPlugin.GetInstance().EditingSession.Start(_serverSettings);
+        }
+    }
 }

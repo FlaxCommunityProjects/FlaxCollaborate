@@ -8,7 +8,9 @@ namespace MultiUsersEditingPlugin
     {
         public int Author { set; get; }
         public bool IsBroadcasted { protected set; get; } = true;
+
         public abstract void Read(BinaryReader bs);
+
         public abstract void Write(BinaryWriter bw);
     }
 }
