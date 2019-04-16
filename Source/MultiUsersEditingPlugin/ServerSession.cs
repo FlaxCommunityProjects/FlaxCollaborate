@@ -133,7 +133,7 @@ namespace MultiUsersEditingPlugin
             _server.Stop();
             foreach (var client in _clients)
             {
-                client.Socket.Close();
+                client.Socket?.Close();
             }
         }
     }

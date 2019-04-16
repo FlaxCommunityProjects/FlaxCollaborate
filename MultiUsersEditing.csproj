@@ -62,6 +62,7 @@
     <Compile Include="Source\MultiUsersEditingPlugin\SessionSettings.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\TestPacket.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\TransformObjectPacket.cs" />
+    <Compile Include="Source\MultiUsersEditingPlugin\UndoActionObjectSerializer.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Windows\HostSessionWindow.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Windows\JoinSessionWindow.cs" />
     <Compile Include="Cache\AssemblyInfo.cs" />
