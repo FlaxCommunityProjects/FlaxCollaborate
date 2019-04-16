@@ -1,5 +1,8 @@
+using System.Linq;
+using System.Reflection;
 using FlaxEditor;
 using FlaxEditor.GUI;
+using FlaxEngine;
 using FlaxEngine.GUI;
 
 namespace MultiUsersEditingPlugin
@@ -24,7 +27,31 @@ namespace MultiUsersEditingPlugin
             _joinButton = _mainButton.ContextMenu.AddButton("Join session");
             _joinButton.Clicked += OnJoinClick;
             _leaveButton = _mainButton.ContextMenu.AddButton("Quit session");
-            _leaveButton.Clicked += () => { EditingSession?.Close(); EditingSession = null; };
+            _leaveButton.Clicked += () =>
+            {
+                // Debug.LogError(FlaxEngine.Json.JsonSerializer.Serialize(new BaseClass()));
+                // Debug.LogError(FlaxEngine.Json.JsonSerializer.Serialize(new DerivedClass()));
+                /* var n = new SelectionChangeAction(new FlaxEditor.SceneGraph.SceneGraphNode[] { Editor.Scene.GetActorNode(SceneManager.FindActor("Camera")), null }, null, null);
+
+                 var fields = n.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+                 for (int i = 0; i < fields.Length; i++)
+                 {
+                     var f = fields[i];
+                     var attributes = f.GetCustomAttributes();
+                     bool x = attributes.Any(a => a is SerializeAttribute);
+                     Debug.LogError(f);
+                     Debug.LogError(x);
+                     if (x)
+                     {
+                     }
+                 }
+                 Debug.Log("========");
+                 Debug.Log(FlaxEngine.Json.JsonSerializer.Serialize(n));
+                 Debug.Log("========");*/
+
+                EditingSession?.Close(); EditingSession = null;
+            };
             //leaveButton.Enabled = false;
 
             Editor.Undo.ActionDone += (IUndoAction action) =>
@@ -32,12 +59,8 @@ namespace MultiUsersEditingPlugin
                 if (EditingSession == null)
                     return;
 
-                if ((action as TransformObjectsAction) != null)
-                {
-                    var transAction = (TransformObjectsAction)action;
-                    Packet p = new TransformObjectPacket(transAction.Data.Selection[0].ID, transAction.Data.After[0].Translation);
-                    EditingSession.SendPacket(p);
-                }
+                Packet p = new GenericUndoActionPacket(action);
+                EditingSession.SendPacket(p);
             };
         }
 
@@ -45,7 +68,6 @@ namespace MultiUsersEditingPlugin
         {
             EditingSession?.Close();
             EditingSession = null;
-            //Editor.UI.ToolStrip.Children.Remove(mainButton);
             _mainButton?.Dispose();
             base.Deinitialize();
         }

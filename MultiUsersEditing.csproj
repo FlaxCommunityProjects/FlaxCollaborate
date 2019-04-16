@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Source\MultiUsersEditingPlugin\ClientSession.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\EditingSessionPlugin.cs" />
+    <Compile Include="Source\MultiUsersEditingPlugin\GenericUndoActionPacket.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\IEditingSession.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Packet.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\PacketTypeManager.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="Source\MultiUsersEditingPlugin\SessionSettings.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\TestPacket.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\TransformObjectPacket.cs" />
+    <Compile Include="Source\MultiUsersEditingPlugin\UndoActionObjectSerializer.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Windows\HostSessionWindow.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Windows\JoinSessionWindow.cs" />
     <Compile Include="Cache\AssemblyInfo.cs" />
