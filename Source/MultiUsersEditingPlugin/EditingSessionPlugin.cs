@@ -59,8 +59,15 @@ namespace MultiUsersEditingPlugin
                 if (EditingSession == null)
                     return;
 
-                Packet p = new GenericUndoActionPacket(action);
-                EditingSession.SendPacket(p);
+                if (action as SelectionChangeAction != null)
+                {
+                    
+                }
+                else
+                {
+                    Packet p = new GenericUndoActionPacket(action);
+                    EditingSession.SendPacket(p);
+                }
             };
         }
 

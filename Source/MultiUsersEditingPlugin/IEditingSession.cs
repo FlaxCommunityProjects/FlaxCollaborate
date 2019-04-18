@@ -1,15 +1,18 @@
 using System;
+using System.Collections.Generic;
+using FlaxEditor.SceneGraph;
 using MultiUsersEditingPlugin;
 
 namespace MultiUsersEditingPlugin
 {
     public interface IEditingSession
     {
+        
         bool IsHosting { get; }
 
         bool Start(SessionSettings settings);
 
-        bool SendPacket(Packet packet);
+        bool SendPacket( Packet packet);
 
         void Close();
     }

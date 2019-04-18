@@ -5,14 +5,16 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using FlaxEditor.SceneGraph;
 using FlaxEngine;
 
 namespace MultiUsersEditingPlugin
 {
     public class ServerSession : IEditingSession
     {
-        private struct Client
+        private struct User
         {
+            public int Id;
             public TcpClient Socket;
             public BinaryReader Reader;
             public BinaryWriter Writer;
@@ -21,7 +23,7 @@ namespace MultiUsersEditingPlugin
         private bool _running;
         private TcpListener _server;
         private IPAddress _address = IPAddress.Parse("127.0.0.1");
-        private Client[] _clients = new Client[10];
+        private List<User> _users = new List<User>();
         private Thread _thread;
 
         public bool IsHosting => true;
@@ -35,53 +37,59 @@ namespace MultiUsersEditingPlugin
 
                 _thread = new Thread(() =>
                 {
+                    List<User> _usersToDelete = new List<User>();
+                    bool _activity = false;
                     _running = true;
                     while (_running)
                     {
                         if (_server.Pending())
                         {
-                            for (int i = 0; i < _clients.Length; i++)
-                            {
-                                if (_clients[i].Socket == null)
-                                {
-                                    _clients[i].Socket = _server.AcceptTcpClient();
-                                    _clients[i].Reader = new BinaryReader(_clients[i].Socket.GetStream());
-                                    _clients[i].Writer = new BinaryWriter(_clients[i].Socket.GetStream());
-                                    Debug.Log("New user connected !");
-                                    break;
-                                }
-                            }
+                            User newUser = new User();
+                            newUser.Id = _users.Count + 1;
+                            newUser.Socket = _server.AcceptTcpClient();
+                            newUser.Reader = new BinaryReader(newUser.Socket.GetStream());
+                            newUser.Writer = new BinaryWriter(newUser.Socket.GetStream());
+                            _users.Add(newUser);
+                            newUser.Writer.Write(newUser.Id);
+                            SendPacket(new UserConnectedPacket(newUser.Id));
+                            Debug.Log("New user connected !");
+                            
                         }
 
-                        for (int i = 0; i < _clients.Length; i++)
+                        foreach (var user in _users)
                         {
-                            if (_clients[i].Socket == null)
+                            if (!user.Socket.Connected)
                             {
+                                _usersToDelete.Add(user);
+                                SendPacket(new UserDisconnectedPacket(user.Id));
                             }
-                            else if (!_clients[i].Socket.Connected)
+                            else if (user.Socket.Available != 0)
                             {
-                                _clients[i].Socket = null;
-                            }
-                            else if (_clients[i].Socket.Available != 0)
-                            {
-                                bool broadcasted = _clients[i].Reader.ReadBoolean();
-                                string classname = _clients[i].Reader.ReadString();
+                                _activity = true;
+                                int senderId = user.Reader.ReadInt32();
+                                bool broadcasted = user.Reader.ReadBoolean();
+                                string classname = user.Reader.ReadString();
                                 Debug.Log("Incoming packet type : " + classname);
                                 Packet p = (Packet)Activator.CreateInstance(
                                     PacketTypeManager.SubclassTypes.First((t) => t.Name.Equals(classname)));
-                                p.Author = _clients[i].Socket.GetHashCode();
-                                p.Read(_clients[i].Reader);
+                                p.Author = user.Socket.GetHashCode();
+                                p.Read(user.Reader);
 
                                 if (broadcasted)
                                 {
-                                    ThreadPool.QueueUserWorkItem((state) => { SendPacket(p); });
+                                    ThreadPool.QueueUserWorkItem((state) => { SendPacket(senderId, p); });
                                 }
                             }
-                            else
-                            {
-                                Thread.Yield();
-                            }
                         }
+
+                        if (_usersToDelete.Count != 0)
+                        {
+                            _usersToDelete.ForEach((user) => _users.Remove(user));
+                            _usersToDelete.Clear();
+                        }
+                        
+                        if (!_activity)
+                            Thread.Yield();
                     }
                 });
 
@@ -101,19 +109,25 @@ namespace MultiUsersEditingPlugin
 
         public bool SendPacket(Packet packet)
         {
+            return SendPacket(-1, packet);
+        }
+
+        public bool SendPacket(int senderId, Packet packet)
+        {
             string s = PacketTypeManager.SubclassTypes.First(t => packet.GetType().IsEquivalentTo(t)).Name;
 
-            foreach (var client in _clients)
+            foreach (var user in _users)
             {
-                if (client.Socket != null &&
-                    client.Socket.GetHashCode() != packet.Author)
+                if (user.Socket != null &&
+                    user.Socket.GetHashCode() != packet.Author)
                 {
-                    lock (client.Socket)
+                    lock (user.Socket)
                     {
                         try
                         {
-                            client.Writer.Write(s);
-                            packet.Write(client.Writer);
+                            user.Writer.Write(senderId);
+                            user.Writer.Write(s);
+                            packet.Write(user.Writer);
                         }
                         catch (Exception e)
                         {
@@ -126,14 +140,14 @@ namespace MultiUsersEditingPlugin
 
             return true;
         }
-
+        
         public void Close()
         {
             _running = false;
             _server.Stop();
-            foreach (var client in _clients)
+            foreach (var user in _users)
             {
-                client.Socket?.Close();
+                user.Socket?.Close();
             }
         }
     }

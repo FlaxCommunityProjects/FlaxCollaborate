@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using FlaxEditor.SceneGraph;
 using FlaxEngine;
 using Microsoft.VisualBasic;
 
@@ -11,6 +12,7 @@ namespace MultiUsersEditingPlugin
 {
     public class ClientSession : IEditingSession
     {
+        private int _Id;
         private TcpClient _socket;
         private NetworkStream _stream;
         private BinaryReader _reader;
@@ -34,7 +36,7 @@ namespace MultiUsersEditingPlugin
                 _stream = _socket.GetStream();
                 _writer = new BinaryWriter(_stream);
                 _reader = new BinaryReader(_stream);
-
+                _Id = _reader.ReadInt32();
                 _thread = new Thread(ReceiveLoop);
                 _thread.IsBackground = true;
                 _thread.Start();
@@ -60,6 +62,7 @@ namespace MultiUsersEditingPlugin
                 }
                 else if (_socket.Available != 0)
                 {
+                    int senderId = _reader.ReadInt32();
                     String s = _reader.ReadString();
                     Packet p = (Packet)Activator.CreateInstance(PacketTypeManager.SubclassTypes.First((t) => t.Name.Equals(s)));
                     p.Read(_reader);
@@ -77,6 +80,7 @@ namespace MultiUsersEditingPlugin
             {
                 try
                 {
+                    _writer.Write(_Id);
                     _writer.Write(packet.IsBroadcasted);
                     _writer.Write(PacketTypeManager.SubclassTypes.First(t => packet.GetType().IsEquivalentTo(t)).Name);
                     packet.Write(_writer);
