@@ -10,7 +10,7 @@ using Microsoft.VisualBasic;
 
 namespace MultiUsersEditingPlugin
 {
-    public class ClientSession : IEditingSession
+    public class ClientSession : EditingSession
     {
         private int _Id;
         private TcpClient _socket;
@@ -22,7 +22,7 @@ namespace MultiUsersEditingPlugin
 
         public bool IsHosting => false;
 
-        public bool Start(SessionSettings settings)
+        public override bool Start(SessionSettings settings)
         {
             try
             {
@@ -36,7 +36,6 @@ namespace MultiUsersEditingPlugin
                 _stream = _socket.GetStream();
                 _writer = new BinaryWriter(_stream);
                 _reader = new BinaryReader(_stream);
-                _Id = _reader.ReadInt32();
                 _thread = new Thread(ReceiveLoop);
                 _thread.IsBackground = true;
                 _thread.Start();
@@ -53,6 +52,8 @@ namespace MultiUsersEditingPlugin
 
         private void ReceiveLoop()
         {
+            _Id = _reader.ReadInt32();
+            
             _running = true;
             while (_running)
             {
@@ -74,7 +75,7 @@ namespace MultiUsersEditingPlugin
             }
         }
 
-        public bool SendPacket(Packet packet)
+        public override bool SendPacket(Packet packet)
         {
             lock (this)
             {
@@ -95,7 +96,7 @@ namespace MultiUsersEditingPlugin
             }
         }
 
-        public void Close()
+        public override void Close()
         {
             _running = false;
             _writer.Close();

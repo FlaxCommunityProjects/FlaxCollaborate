@@ -10,7 +10,7 @@ using FlaxEngine;
 
 namespace MultiUsersEditingPlugin
 {
-    public class ServerSession : IEditingSession
+    public class ServerSession : EditingSession
     {
         private struct User
         {
@@ -28,7 +28,7 @@ namespace MultiUsersEditingPlugin
 
         public bool IsHosting => true;
 
-        public bool Start(SessionSettings settings)
+        public override bool Start(SessionSettings settings)
         {
             try
             {
@@ -107,7 +107,7 @@ namespace MultiUsersEditingPlugin
             return true;
         }
 
-        public bool SendPacket(Packet packet)
+        public override bool SendPacket(Packet packet)
         {
             return SendPacket(-1, packet);
         }
@@ -141,7 +141,7 @@ namespace MultiUsersEditingPlugin
             return true;
         }
         
-        public void Close()
+        public override void Close()
         {
             _running = false;
             _server.Stop();

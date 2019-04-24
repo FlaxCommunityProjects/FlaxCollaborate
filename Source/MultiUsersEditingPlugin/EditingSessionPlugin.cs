@@ -9,7 +9,7 @@ namespace MultiUsersEditingPlugin
 {
     public class EditingSessionPlugin : EditorPlugin
     {
-        public IEditingSession EditingSession;
+        public EditingSession EditingSession;
 
         private ContextMenuChildMenu _mainButton;
         private ContextMenuButton _hostButton;
@@ -63,9 +63,10 @@ namespace MultiUsersEditingPlugin
                 {
                     
                 }
-                else
+                else if(action as TransformObjectsAction != null)
                 {
-                    Packet p = new GenericUndoActionPacket(action);
+                    TransformObjectsAction a = (TransformObjectsAction) action;
+                    Packet p = new TransformObjectPacket(a.Data.Selection[0].ID, a.Data.After[0].Translation);
                     EditingSession.SendPacket(p);
                 }
             };
