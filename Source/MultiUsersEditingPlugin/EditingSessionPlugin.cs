@@ -12,9 +12,7 @@ namespace MultiUsersEditingPlugin
     {
         public EditingSession Session;
 
-        private ContextMenuChildMenu _mainButton;
         private ContextMenuButton _collaborateButton;
-        
         private Label _labelConnected;
 
         public override void InitializeEditor()

@@ -26,7 +26,6 @@ namespace MultiUsersEditingPlugin
         public override void Initialize(LayoutElementsContainer layout)
         {
             _layout = layout;
-            _layout.Control.LocationChanged += (loc) => { Debug.Log(loc); };
             switch (_state)
             {
                 case State.Join:
