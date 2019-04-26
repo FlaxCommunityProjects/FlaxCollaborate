@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using FlaxEditor;
 using FlaxEditor.GUI;
@@ -9,92 +10,62 @@ namespace MultiUsersEditingPlugin
 {
     public class EditingSessionPlugin : EditorPlugin
     {
-        public EditingSession EditingSession;
+        public EditingSession Session;
 
         private ContextMenuChildMenu _mainButton;
-        private ContextMenuButton _hostButton;
-        private ContextMenuButton _joinButton;
-        private ContextMenuButton _leaveButton;
+        private ContextMenuButton _collaborateButton;
+        
+        private Label _labelConnected;
 
         public override void InitializeEditor()
         {
             base.InitializeEditor();
             Instance = this;
-
-            _mainButton = Editor.UI.MainMenu.GetButton("Tools").ContextMenu.GetOrAddChildMenu("Collaborate");
-            _hostButton = _mainButton.ContextMenu.AddButton("Host session");
-            _hostButton.Clicked += OnHostClick;
-            _joinButton = _mainButton.ContextMenu.AddButton("Join session");
-            _joinButton.Clicked += OnJoinClick;
-            _leaveButton = _mainButton.ContextMenu.AddButton("Quit session");
-            _leaveButton.Clicked += () =>
-            {
-                // Debug.LogError(FlaxEngine.Json.JsonSerializer.Serialize(new BaseClass()));
-                // Debug.LogError(FlaxEngine.Json.JsonSerializer.Serialize(new DerivedClass()));
-                /* var n = new SelectionChangeAction(new FlaxEditor.SceneGraph.SceneGraphNode[] { Editor.Scene.GetActorNode(SceneManager.FindActor("Camera")), null }, null, null);
-
-                 var fields = n.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-                 for (int i = 0; i < fields.Length; i++)
-                 {
-                     var f = fields[i];
-                     var attributes = f.GetCustomAttributes();
-                     bool x = attributes.Any(a => a is SerializeAttribute);
-                     Debug.LogError(f);
-                     Debug.LogError(x);
-                     if (x)
-                     {
-                     }
-                 }
-                 Debug.Log("========");
-                 Debug.Log(FlaxEngine.Json.JsonSerializer.Serialize(n));
-                 Debug.Log("========");*/
-
-                EditingSession?.Close(); EditingSession = null;
-            };
-            //leaveButton.Enabled = false;
+            _collaborateButton = Editor.UI.MainMenu.GetButton("Window").ContextMenu.AddButton("Collaborate");
+            _collaborateButton.Clicked += () => { new CollaborateWindow().Show();};
+            
+            _labelConnected = Editor.UI.StatusBar.AddChild<Label>();
+            _labelConnected.X = Editor.UI.StatusBar.Width - Editor.UI.StatusBar.Width * 0.3f;
+            _labelConnected.DockStyle = DockStyle.None;
+            _labelConnected.OnChildControlResized += (control) => { _labelConnected.X = Editor.UI.StatusBar.Width - Editor.UI.StatusBar.Width * 0.3f;};
+            _labelConnected.Text = "Disconnected";
 
             Editor.Undo.ActionDone += (IUndoAction action) =>
-            {
-                if (EditingSession == null)
+            {            
+                if (Session == null)
                     return;
 
                 if (action as SelectionChangeAction != null)
                 {
                     
                 }
-                else if(action as TransformObjectsAction != null)
+                else
                 {
-                    TransformObjectsAction a = (TransformObjectsAction) action;
-                    Packet p = new TransformObjectPacket(a.Data.Selection[0].ID, a.Data.After[0].Translation);
-                    EditingSession.SendPacket(p);
+                    Packet p = new GenericUndoActionPacket(action);
+                    Session.SendPacket(p);
                 }
             };
         }
 
         public override void Deinitialize()
         {
-            EditingSession?.Close();
-            EditingSession = null;
-            _mainButton?.Dispose();
+            Session?.Close();
+            Session = null;
+            _collaborateButton.Dispose();
+            _labelConnected.Dispose();
             base.Deinitialize();
         }
 
-        public void OnHostClick()
-        {
-            new HostSessionWindow().Show();
-        }
+        private static EditingSessionPlugin _instance;
 
-        public void OnJoinClick()
+        public static EditingSessionPlugin Instance
         {
-            new JoinSessionWindow().Show();
-        }
+            get
+            {
+                return _instance;
+            }
 
-        private static EditingSessionPlugin Instance;
-
-        public static EditingSessionPlugin GetInstance()
-        {
-            return Instance;
+            protected set { _instance = value; }
         }
     }
 }

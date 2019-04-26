@@ -23,7 +23,7 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>DEBUG;FLAX_ASSERTIONS;TRACE;FLAX_0;FLAX_0_4;FLAX_0_4_6181;FLAX_EDITOR;FLAX_WINDOWS;FLAX_EDITOR_WIN</DefineConstants>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
+	<UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>portable</DebugType>
@@ -34,28 +34,28 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>TRACE;FLAX_0;FLAX_0_4;FLAX_0_4_6181;FLAX_EDITOR;FLAX_WINDOWS;FLAX_EDITOR_WIN</DefineConstants>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
+	<UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
-    <Reference Include="FlaxEngine">
-      <HintPath>Cache\Assemblies\Release\FlaxEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>Cache\Assemblies\Release\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="FlaxEditor">
-      <HintPath>Cache\Assemblies\Release\FlaxEditor.dll</HintPath>
-    </Reference>
+	<Reference Include="FlaxEngine">
+		<HintPath>Cache\Assemblies\Release\FlaxEngine.dll</HintPath>
+	</Reference>
+	<Reference Include="Newtonsoft.Json">
+		<HintPath>Cache\Assemblies\Release\Newtonsoft.Json.dll</HintPath>
+	</Reference>
+	<Reference Include="FlaxEditor">
+		<HintPath>Cache\Assemblies\Release\FlaxEditor.dll</HintPath>
+	</Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Source\MultiUsersEditingPlugin\ClientSession.cs" />
+    <Compile Include="Source\MultiUsersEditingPlugin\EditingSession.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\EditingSessionPlugin.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\EditingUser.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\EditingSession.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Packet.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\PacketTypeManager.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\ServerSession.cs" />
@@ -67,9 +67,8 @@
     <Compile Include="Source\MultiUsersEditingPlugin\Packets\TransformObjectPacket.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Packets\UserConnectedPacket.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Packets\UserDisconnectedPacket.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\Windows\HostSessionWindow.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\Windows\JoinSessionWindow.cs" />
+    <Compile Include="Source\MultiUsersEditingPlugin\Windows\CollaborateWindow.cs" />
     <Compile Include="Cache\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-</Project>
+</Project>

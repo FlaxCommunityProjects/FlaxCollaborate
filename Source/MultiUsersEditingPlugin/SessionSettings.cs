@@ -9,9 +9,11 @@ namespace MultiUsersEditingPlugin
 {
     public class SessionSettings
     {
-        public virtual string Host { get; set; }
+        public String Username { get; set;  }
 
-        public int Port { get; set; }
+        public virtual string Host { get; set; } = "127.0.0.1";
+
+        public int Port { get; set; } = 25874;
     }
 
     public class ServerSessionSettings : SessionSettings

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using FlaxEditor.SceneGraph;
 using FlaxEngine;
@@ -12,7 +13,7 @@ namespace MultiUsersEditingPlugin
 {
     public class ServerSession : EditingSession
     {
-        private struct User
+        private struct SocketUser
         {
             public int Id;
             public TcpClient Socket;
@@ -23,11 +24,13 @@ namespace MultiUsersEditingPlugin
         private bool _running;
         private TcpListener _server;
         private IPAddress _address = IPAddress.Parse("127.0.0.1");
-        private List<User> _users = new List<User>();
+        private List<SocketUser> _socketUsers = new List<SocketUser>();
+        
         private Thread _thread;
 
-        public bool IsHosting => true;
+        public override bool IsHosting => true;
 
+        
         public override bool Start(SessionSettings settings)
         {
             try
@@ -37,26 +40,40 @@ namespace MultiUsersEditingPlugin
 
                 _thread = new Thread(() =>
                 {
-                    List<User> _usersToDelete = new List<User>();
+                    List<SocketUser> _usersToDelete = new List<SocketUser>();
                     bool _activity = false;
                     _running = true;
                     while (_running)
                     {
                         if (_server.Pending())
                         {
-                            User newUser = new User();
-                            newUser.Id = _users.Count + 1;
-                            newUser.Socket = _server.AcceptTcpClient();
-                            newUser.Reader = new BinaryReader(newUser.Socket.GetStream());
-                            newUser.Writer = new BinaryWriter(newUser.Socket.GetStream());
-                            _users.Add(newUser);
-                            newUser.Writer.Write(newUser.Id);
-                            SendPacket(new UserConnectedPacket(newUser.Id));
-                            Debug.Log("New user connected !");
+                            SocketUser newSocketUser = new SocketUser();
+                            newSocketUser.Socket = _server.AcceptTcpClient();
+                            newSocketUser.Reader = new BinaryReader(newSocketUser.Socket.GetStream());
+                            newSocketUser.Writer = new BinaryWriter(newSocketUser.Socket.GetStream());
+
+                            String username = newSocketUser.Reader.ReadString();
                             
+                            var id = CreateId(username);
+                            
+                            if (id == -1) // Username is already taken -> send the info and drop the user 
+                            {
+                                newSocketUser.Writer.Write(false);
+                            }
+                            else // User accepted
+                            {
+                                newSocketUser.Id = id;
+                                _socketUsers.Add(newSocketUser);
+                                newSocketUser.Writer.Write(newSocketUser.Id);
+                                
+                                EditingUser newEditUser = new EditingUser(id, username, false);
+                                Users.Add(newEditUser);
+                                SendPacket(id, new UserConnectedPacket(id, username, false));
+                                Debug.Log("New user connected !");
+                            }
                         }
 
-                        foreach (var user in _users)
+                        foreach (var user in _socketUsers)
                         {
                             if (!user.Socket.Connected)
                             {
@@ -69,10 +86,11 @@ namespace MultiUsersEditingPlugin
                                 int senderId = user.Reader.ReadInt32();
                                 bool broadcasted = user.Reader.ReadBoolean();
                                 string classname = user.Reader.ReadString();
-                                Debug.Log("Incoming packet type : " + classname);
+                                //Debug.Log("Incoming packet type : " + classname);
+                                
                                 Packet p = (Packet)Activator.CreateInstance(
                                     PacketTypeManager.SubclassTypes.First((t) => t.Name.Equals(classname)));
-                                p.Author = user.Socket.GetHashCode();
+                                p.Author = user.Id;
                                 p.Read(user.Reader);
 
                                 if (broadcasted)
@@ -84,7 +102,7 @@ namespace MultiUsersEditingPlugin
 
                         if (_usersToDelete.Count != 0)
                         {
-                            _usersToDelete.ForEach((user) => _users.Remove(user));
+                            _usersToDelete.ForEach((user) => _socketUsers.Remove(user));
                             _usersToDelete.Clear();
                         }
                         
@@ -116,10 +134,10 @@ namespace MultiUsersEditingPlugin
         {
             string s = PacketTypeManager.SubclassTypes.First(t => packet.GetType().IsEquivalentTo(t)).Name;
 
-            foreach (var user in _users)
+            foreach (var user in _socketUsers)
             {
                 if (user.Socket != null &&
-                    user.Socket.GetHashCode() != packet.Author)
+                    user.Id != packet.Author)
                 {
                     lock (user.Socket)
                     {
@@ -145,10 +163,20 @@ namespace MultiUsersEditingPlugin
         {
             _running = false;
             _server.Stop();
-            foreach (var user in _users)
+            foreach (var user in _socketUsers)
             {
                 user.Socket?.Close();
             }
+        }
+
+        private int CreateId(String username)
+        {
+            int id = username.GetHashCode();
+
+            if (GetUserById(id) != null)
+                return -1;
+
+            return id;
         }
     }
 }

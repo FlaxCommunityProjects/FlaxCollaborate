@@ -43,7 +43,7 @@ namespace MultiUsersEditingPlugin
             {
                 if (typeName == this.ObjectDiffPacket)
                 {
-                    Debug.Log(data);
+                    //Debug.Log(data);
                     IUndoAction undoAction = UndoActionObjectSerializer.FromJson(data);
                     undoAction.Do();
                 }
@@ -51,8 +51,8 @@ namespace MultiUsersEditingPlugin
                 {
                     object undoAction = System.Runtime.Serialization.FormatterServices.GetUninitializedObject(Type.GetType(typeName));
 
-                    Debug.Log(typeName);
-                    Debug.Log(data);
+                    //Debug.Log(typeName);
+                    //Debug.Log(data);
 
                     FlaxEngine.Json.JsonSerializer.Deserialize(undoAction, data);
 
