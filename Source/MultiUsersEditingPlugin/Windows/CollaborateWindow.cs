@@ -49,9 +49,10 @@ namespace MultiUsersEditingPlugin
             _layout.ContainerControl.AnchorStyle = AnchorStyle.Upper;
             _state = State.Join;
             _layout.ClearLayout();
+            _layout.Space(5);
             var label = _layout.Label("Joining Session", TextAlignment.Center);
             label.Label.Font.Size = 11;
-            _layout.Space(10);
+            _layout.Space(5);
 
             var clientSettingsEditor = new CustomEditorPresenter(null);
             clientSettingsEditor.Panel.Parent = _layout.ContainerControl;
@@ -66,7 +67,6 @@ namespace MultiUsersEditingPlugin
                 EditingSessionPlugin.Instance.Session = new ClientSession();
                 if (EditingSessionPlugin.Instance.Session.Start(_settings))
                 {
-
                     showSession();
                 }
             };
@@ -83,9 +83,10 @@ namespace MultiUsersEditingPlugin
             _layout.ContainerControl.AnchorStyle = AnchorStyle.Upper;
             _state = State.Host;
             _layout.ClearLayout();
+            _layout.Space(5);
             var label = _layout.Label("Hosting Session", TextAlignment.Center);
             label.Label.Font.Size = 11;
-            _layout.Space(10);
+            _layout.Space(5);
 
             var serverSettingsEditor = new CustomEditorPresenter(null);
             serverSettingsEditor.Panel.Parent = _layout.ContainerControl;
@@ -146,11 +147,11 @@ namespace MultiUsersEditingPlugin
             hostButton.X = panel.Width / 2 + emptySpace;
             
             _layout.ContainerControl.SizeChanged += (size) =>
-                {
-                    joinButton.X = panel.Width / 2 - bSize - emptySpace;
+            {
+                joinButton.X = panel.Width / 2 - bSize - emptySpace;
                     
-                    hostButton.X = panel.Width / 2 + emptySpace;
-                };
+                hostButton.X = panel.Width / 2 + emptySpace;
+            };
 
             joinButton.Clicked += () =>
             {
