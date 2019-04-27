@@ -26,21 +26,7 @@ namespace MultiUsersEditingPlugin
         public override void Initialize(LayoutElementsContainer layout)
         {
             _layout = layout;
-            switch (_state)
-            {
-                case State.Join:
-                    showJoin();
-                    break;
-                case State.Host:
-                    showHost();
-                    break;
-                case State.Session:
-                    showSession();
-                    break;
-                case State.NoSession:
-                    showNoSession();
-                    break;
-            }
+            Rebuild();
         }
 
         private void showJoin()
@@ -113,9 +99,34 @@ namespace MultiUsersEditingPlugin
         private void showSession()
         {
             _layout.ContainerControl.DisposeChildren();
-            _layout.ContainerControl.AnchorStyle = AnchorStyle.Upper;
             _state = State.Session;
 
+            var vpanel = _layout.ContainerControl.AddChild<VerticalPanel>();
+            
+            var userList = vpanel.AddChild<DropPanel>();
+            userList.HeaderText = "Users List";
+
+            EditingSessionPlugin.Instance.Session.Users.ForEach((user) =>
+            {
+                var label = userList.AddChild<Label>();
+                label.Text = user.Name;
+                if (user.IsServer)
+                    label.Text += "*";
+            });
+
+            var p = vpanel.AddChild<Panel>();
+            p.BackgroundColor = Color.Transparent;
+            p.Height = 40;
+            
+            var disconnectButton = vpanel.AddChild<Button>();
+            disconnectButton.Text = "Disconnect";
+            disconnectButton.Clicked += () =>
+            {
+                EditingSessionPlugin.Instance.Session.Close();
+                showNoSession();
+            };
+            
+            _layout.ContainerControl.PerformLayout(true);
         }
 
         private void showNoSession()
@@ -162,6 +173,25 @@ namespace MultiUsersEditingPlugin
             {
                 showHost();
             };
+        }
+
+        public void Rebuild()
+        {
+            switch (_state)
+            {
+                case State.Join:
+                    showJoin();
+                    break;
+                case State.Host:
+                    showHost();
+                    break;
+                case State.Session:
+                    showSession();
+                    break;
+                case State.NoSession:
+                    showNoSession();
+                    break;
+            }
         }
     }
 }

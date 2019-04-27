@@ -14,13 +14,19 @@ namespace MultiUsersEditingPlugin
 
         private ContextMenuButton _collaborateButton;
         private Label _labelConnected;
-
+        
+        public CollaborateWindow CollaborateWindow { get; private set; }
+        
         public override void InitializeEditor()
         {
             base.InitializeEditor();
             Instance = this;
             _collaborateButton = Editor.UI.MainMenu.GetButton("Window").ContextMenu.AddButton("Collaborate");
-            _collaborateButton.Clicked += () => { new CollaborateWindow().Show();};
+            _collaborateButton.Clicked += () =>
+            {
+                CollaborateWindow = new CollaborateWindow();
+                CollaborateWindow.Show();
+            };
             
             _labelConnected = Editor.UI.StatusBar.AddChild<Label>();
             _labelConnected.X = Editor.UI.StatusBar.Width - Editor.UI.StatusBar.Width * 0.3f;

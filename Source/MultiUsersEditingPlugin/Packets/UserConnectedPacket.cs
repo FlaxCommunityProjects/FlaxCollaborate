@@ -28,6 +28,7 @@ namespace MultiUsersEditingPlugin
             IsServer = bs.ReadBoolean();
             
             EditingSessionPlugin.Instance.Session.Users.Add(new EditingUser(UserId, Username, IsServer));
+            EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
         }
 
         public override void Write(BinaryWriter bw)

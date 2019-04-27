@@ -38,6 +38,7 @@ namespace MultiUsersEditingPlugin
                 _server = new TcpListener(_address, settings.Port);
                 _server.Start();
 
+                Users.Add(new EditingUser(CreateId(settings.Username), settings.Username, true));
                 _thread = new Thread(() =>
                 {
                     List<SocketUser> _usersToDelete = new List<SocketUser>();
@@ -69,6 +70,10 @@ namespace MultiUsersEditingPlugin
                                 EditingUser newEditUser = new EditingUser(id, username, false);
                                 Users.Add(newEditUser);
                                 SendPacket(id, new UserConnectedPacket(id, username, false));
+                                Scripting.InvokeOnUpdate(() =>
+                                {
+                                    EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
+                                });
                                 Debug.Log("New user connected !");
                             }
                         }
