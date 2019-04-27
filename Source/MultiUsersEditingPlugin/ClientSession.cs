@@ -49,6 +49,10 @@ namespace MultiUsersEditingPlugin
                     return false;
                 }
 
+                _writer.Write(settings.SelectionColor.R);
+                _writer.Write(settings.SelectionColor.G);
+                _writer.Write(settings.SelectionColor.B);
+                
                 _id = _reader.ReadInt32();
                 
                 _thread.IsBackground = true;

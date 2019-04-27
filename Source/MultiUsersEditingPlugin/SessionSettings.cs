@@ -11,6 +11,8 @@ namespace MultiUsersEditingPlugin
     {
         public String Username { get; set;  }
 
+        public Color SelectionColor { get; set; }
+        
         public virtual string Host { get; set; } = "127.0.0.1";
 
         public int Port { get; set; } = 25874;

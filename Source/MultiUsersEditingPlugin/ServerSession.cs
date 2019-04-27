@@ -38,7 +38,7 @@ namespace MultiUsersEditingPlugin
                 _server = new TcpListener(_address, settings.Port);
                 _server.Start();
 
-                Users.Add(new EditingUser(CreateId(settings.Username), settings.Username, true));
+                Users.Add(new EditingUser(CreateId(settings.Username), settings.Username, settings.SelectionColor, true));
                 _thread = new Thread(() =>
                 {
                     List<SocketUser> _usersToDelete = new List<SocketUser>();
@@ -63,13 +63,22 @@ namespace MultiUsersEditingPlugin
                             }
                             else // User accepted
                             {
+                                newSocketUser.Writer.Write(true);
+                                
                                 newSocketUser.Id = id;
                                 _socketUsers.Add(newSocketUser);
+                                
+                                var color = new Color();
+                                color.R = newSocketUser.Reader.ReadSingle();
+                                color.G = newSocketUser.Reader.ReadSingle();
+                                color.B = newSocketUser.Reader.ReadSingle();
+                                color.A = 1;
+                                
                                 newSocketUser.Writer.Write(newSocketUser.Id);
                                 
-                                EditingUser newEditUser = new EditingUser(id, username, false);
+                                EditingUser newEditUser = new EditingUser(id, username, color, false);
                                 Users.Add(newEditUser);
-                                SendPacket(id, new UserConnectedPacket(id, username, false));
+                                SendPacket(id, new UserConnectedPacket(id, username, color, false));
                                 Scripting.InvokeOnUpdate(() =>
                                 {
                                     EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();

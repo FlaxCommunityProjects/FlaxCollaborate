@@ -41,7 +41,8 @@ namespace MultiUsersEditingPlugin
 
                 if (action as SelectionChangeAction != null)
                 {
-                    
+                    var a = (SelectionChangeAction) action;
+                    //a.Data.After[0].
                 }
                 else
                 {

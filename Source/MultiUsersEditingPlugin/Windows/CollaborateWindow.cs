@@ -105,11 +105,12 @@ namespace MultiUsersEditingPlugin
             
             var userList = vpanel.AddChild<DropPanel>();
             userList.HeaderText = "Users List";
-
+            
             EditingSessionPlugin.Instance.Session.Users.ForEach((user) =>
             {
                 var label = userList.AddChild<Label>();
                 label.Text = user.Name;
+                label.TextColor = user.SelectionColor;
                 if (user.IsServer)
                     label.Text += "*";
             });
