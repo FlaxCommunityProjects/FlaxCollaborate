@@ -14,12 +14,9 @@ namespace MultiUsersEditingPlugin
         
         public SceneGraphNode[] Selection
         {
-            set
-            {
-                // Update selection outline
-            }
+            set;
 
-            get { return Selection; }
+            get;
         }
 
         public EditingUser(int id, String username, Color selectionColor, bool server)

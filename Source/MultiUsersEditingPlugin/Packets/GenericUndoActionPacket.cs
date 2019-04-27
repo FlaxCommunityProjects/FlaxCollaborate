@@ -56,7 +56,8 @@ namespace MultiUsersEditingPlugin
 
                     FlaxEngine.Json.JsonSerializer.Deserialize(undoAction, data);
 
-                    // I feel so dirty after writing this:
+                    // I feel so dirty after writing this: 
+                    // But actually, that's the easiest way to get it work :p
                     if (undoAction is SelectionChangeAction selectionChangeAction)
                     {
                         // This undo action specifically needs some special treatment
@@ -67,10 +68,16 @@ namespace MultiUsersEditingPlugin
                             (param) => callbackMethod.Invoke(Editor.Instance.SceneEditing, new object[] { param });
 
                         callbackProp.SetValue(selectionChangeAction, callbackLambda);
+
+
+                        EditingSessionPlugin.Instance.Session.GetUserById(Author).Selection =
+                            (undoAction as SelectionChangeAction).Data.After;
                     }
-
+                    else
+                    {
                         (undoAction as IUndoAction).Do();
-
+                    }
+                    
                     // This might be a slightly bad idea :tm:
                     // Commenting it out for now, to prevent an infinite loop
                     // If you ever want this to happen, you'll have to add some more special handling for the MultiUndoAction

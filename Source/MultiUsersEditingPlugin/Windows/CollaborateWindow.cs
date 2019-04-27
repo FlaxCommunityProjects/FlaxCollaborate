@@ -20,7 +20,7 @@ namespace MultiUsersEditingPlugin
 
         private State _state = State.NoSession;
         
-        private SessionSettings _settings = new SessionSettings();
+        private SessionSettings _settings;
         private LayoutElementsContainer _layout;
  
         public override void Initialize(LayoutElementsContainer layout)
@@ -40,6 +40,8 @@ namespace MultiUsersEditingPlugin
             label.Label.Font.Size = 11;
             _layout.Space(5);
 
+            _settings = new SessionSettings();
+            
             var clientSettingsEditor = new CustomEditorPresenter(null);
             clientSettingsEditor.Panel.Parent = _layout.ContainerControl;
             clientSettingsEditor.Select(_settings);
@@ -74,6 +76,8 @@ namespace MultiUsersEditingPlugin
             label.Label.Font.Size = 11;
             _layout.Space(5);
 
+            _settings = new ServerSessionSettings();
+            
             var serverSettingsEditor = new CustomEditorPresenter(null);
             serverSettingsEditor.Panel.Parent = _layout.ContainerControl;
             serverSettingsEditor.Select(_settings);
@@ -105,6 +109,7 @@ namespace MultiUsersEditingPlugin
             
             var userList = vpanel.AddChild<DropPanel>();
             userList.HeaderText = "Users List";
+            userList.EnableDropDownIcon = true;
             
             EditingSessionPlugin.Instance.Session.Users.ForEach((user) =>
             {
@@ -115,9 +120,13 @@ namespace MultiUsersEditingPlugin
                     label.Text += "*";
             });
 
+            var settings = vpanel.AddChild<DropPanel>();
+            settings.HeaderText = "Settings";
+            settings.EnableDropDownIcon = true;
+            
             var p = vpanel.AddChild<Panel>();
             p.BackgroundColor = Color.Transparent;
-            p.Height = 40;
+            p.Height = 10;
             
             var disconnectButton = vpanel.AddChild<Button>();
             disconnectButton.Text = "Disconnect";

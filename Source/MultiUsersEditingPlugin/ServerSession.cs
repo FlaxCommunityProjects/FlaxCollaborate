@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using FlaxEditor;
 using FlaxEditor.SceneGraph;
 using FlaxEngine;
 
@@ -76,12 +77,22 @@ namespace MultiUsersEditingPlugin
                                 
                                 newSocketUser.Writer.Write(newSocketUser.Id);
                                 
+                                // Send hosting user info
+                                /*var p = new UserConnectedPacket();
+                                p.Write(newSocketUser.Writer);*/
+                                
                                 EditingUser newEditUser = new EditingUser(id, username, color, false);
                                 Users.Add(newEditUser);
                                 SendPacket(id, new UserConnectedPacket(id, username, color, false));
                                 Scripting.InvokeOnUpdate(() =>
                                 {
                                     EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
+                                    Scripting.InvokeOnUpdate(() =>
+                                    {
+                                        var sessionSelectionOutline = new SessionSelectionOutline(id);
+                                        Editor.Instance.Windows.EditWin.Viewport.Task.CustomPostFx.Add(sessionSelectionOutline);
+                                        Debug.Log("Outline added");
+                                    });
                                 });
                                 Debug.Log("New user connected !");
                             }

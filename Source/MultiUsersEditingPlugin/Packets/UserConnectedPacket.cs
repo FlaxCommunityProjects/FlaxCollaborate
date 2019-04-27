@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using FlaxEditor;
 using FlaxEngine;
 
 namespace MultiUsersEditingPlugin
@@ -38,6 +39,13 @@ namespace MultiUsersEditingPlugin
             
             EditingSessionPlugin.Instance.Session.Users.Add(new EditingUser(UserId, Username, SelectionColor, IsServer));
             EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
+            
+            Scripting.InvokeOnUpdate(() =>
+            {
+                var sessionSelectionOutline = new SessionSelectionOutline(UserId);
+                Editor.Instance.Windows.EditWin.Viewport.Task.CustomPostFx.Add(sessionSelectionOutline);
+                Debug.Log("Outline added");
+            });
         }
 
         public override void Write(BinaryWriter bw)

@@ -39,16 +39,10 @@ namespace MultiUsersEditingPlugin
                 if (Session == null)
                     return;
 
-                if (action as SelectionChangeAction != null)
-                {
-                    var a = (SelectionChangeAction) action;
-                    //a.Data.After[0].
-                }
-                else
-                {
+
                     Packet p = new GenericUndoActionPacket(action);
                     Session.SendPacket(p);
-                }
+                
             };
         }
 

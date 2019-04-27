@@ -9,23 +9,21 @@ namespace MultiUsersEditingPlugin
 {
     public class SessionSettings
     {
-        public String Username { get; set;  }
+        public string Username { get; set; } = "Client";
 
-        public Color SelectionColor { get; set; }
+        public Color SelectionColor { get; set; } = new Color(1);
         
-        public virtual string Host { get; set; } = "127.0.0.1";
+        public string Host { get; set; } = "127.0.0.1";
 
         public int Port { get; set; } = 25874;
     }
 
     public class ServerSessionSettings : SessionSettings
     {
-        [HideInEditor]
-        public override string Host { get => base.Host; set => base.Host = value; }
-
         public ServerSessionSettings()
         {
             Host = "localhost";
+            Username = "Host";
         }
     }
 }
