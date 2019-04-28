@@ -9,6 +9,7 @@ using System.Threading;
 using FlaxEditor;
 using FlaxEditor.SceneGraph;
 using FlaxEngine;
+using MultiUsersEditing.Source.MultiUsersEditingPlugin;
 
 namespace MultiUsersEditingPlugin
 {
@@ -26,12 +27,11 @@ namespace MultiUsersEditingPlugin
         private TcpListener _server;
         private IPAddress _address = IPAddress.Parse("127.0.0.1");
         private List<SocketUser> _socketUsers = new List<SocketUser>();
-        
         private Thread _thread;
 
         public override bool IsHosting => true;
 
-        
+
         public override bool Start(SessionSettings settings)
         {
             try
@@ -39,7 +39,8 @@ namespace MultiUsersEditingPlugin
                 _server = new TcpListener(_address, settings.Port);
                 _server.Start();
 
-                Users.Add(new EditingUser(CreateId(settings.Username), settings.Username, settings.SelectionColor, true));
+                Users.Add(User = new EditingUser(CreateId(settings.Username), settings.Username,
+                    settings.SelectionColor, true));
                 _thread = new Thread(() =>
                 {
                     List<SocketUser> _usersToDelete = new List<SocketUser>();
@@ -49,15 +50,16 @@ namespace MultiUsersEditingPlugin
                     {
                         if (_server.Pending())
                         {
+                            _activity = true;
                             SocketUser newSocketUser = new SocketUser();
                             newSocketUser.Socket = _server.AcceptTcpClient();
                             newSocketUser.Reader = new BinaryReader(newSocketUser.Socket.GetStream());
                             newSocketUser.Writer = new BinaryWriter(newSocketUser.Socket.GetStream());
 
                             String username = newSocketUser.Reader.ReadString();
-                            
+
                             var id = CreateId(username);
-                            
+
                             if (id == -1) // Username is already taken -> send the info and drop the user 
                             {
                                 newSocketUser.Writer.Write(false);
@@ -65,36 +67,33 @@ namespace MultiUsersEditingPlugin
                             else // User accepted
                             {
                                 newSocketUser.Writer.Write(true);
-                                
+
                                 newSocketUser.Id = id;
                                 _socketUsers.Add(newSocketUser);
-                                
+
                                 var color = new Color();
                                 color.R = newSocketUser.Reader.ReadSingle();
                                 color.G = newSocketUser.Reader.ReadSingle();
                                 color.B = newSocketUser.Reader.ReadSingle();
                                 color.A = 1;
-                                
+
                                 newSocketUser.Writer.Write(newSocketUser.Id);
-                                
+
                                 // Send hosting user info
-                                /*var p = new UserConnectedPacket();
-                                p.Write(newSocketUser.Writer);*/
-                                
+                                var p = new UsersListPacket(Users);
+                                SendPacket(p);
+
                                 EditingUser newEditUser = new EditingUser(id, username, color, false);
                                 Users.Add(newEditUser);
                                 SendPacket(id, new UserConnectedPacket(id, username, color, false));
                                 Scripting.InvokeOnUpdate(() =>
                                 {
                                     EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
-                                    Scripting.InvokeOnUpdate(() =>
-                                    {
-                                        var sessionSelectionOutline = new SessionSelectionOutline(id);
-                                        Editor.Instance.Windows.EditWin.Viewport.Task.CustomPostFx.Add(sessionSelectionOutline);
-                                        Debug.Log("Outline added");
-                                    });
+
+                                    newEditUser.Outline = FlaxEngine.Object.New<CustomOutliner>();
+                                    newEditUser.Outline.UserId = newEditUser.Id;
+                                    Editor.Instance.Windows.EditWin.Viewport.Task.CustomPostFx.Add(newEditUser.Outline);
                                 });
-                                Debug.Log("New user connected !");
                             }
                         }
 
@@ -111,11 +110,10 @@ namespace MultiUsersEditingPlugin
                                 int senderId = user.Reader.ReadInt32();
                                 bool broadcasted = user.Reader.ReadBoolean();
                                 string classname = user.Reader.ReadString();
-                                //Debug.Log("Incoming packet type : " + classname);
-                                
-                                Packet p = (Packet)Activator.CreateInstance(
+
+                                Packet p = (Packet) Activator.CreateInstance(
                                     PacketTypeManager.SubclassTypes.First((t) => t.Name.Equals(classname)));
-                                p.Author = user.Id;
+                                p.Author = senderId;
                                 p.Read(user.Reader);
 
                                 if (broadcasted)
@@ -130,9 +128,11 @@ namespace MultiUsersEditingPlugin
                             _usersToDelete.ForEach((user) => _socketUsers.Remove(user));
                             _usersToDelete.Clear();
                         }
-                        
+
                         if (!_activity)
                             Thread.Yield();
+                        
+                        _activity = false;
                     }
                 });
 
@@ -152,7 +152,7 @@ namespace MultiUsersEditingPlugin
 
         public override bool SendPacket(Packet packet)
         {
-            return SendPacket(-1, packet);
+            return SendPacket(User.Id, packet);
         }
 
         public bool SendPacket(int senderId, Packet packet)
@@ -183,7 +183,7 @@ namespace MultiUsersEditingPlugin
 
             return true;
         }
-        
+
         public override void Close()
         {
             _running = false;

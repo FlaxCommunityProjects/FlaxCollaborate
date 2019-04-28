@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using FlaxEditor;
 using FlaxEngine;
+using MultiUsersEditing.Source.MultiUsersEditingPlugin;
 
 namespace MultiUsersEditingPlugin
 {
@@ -36,15 +37,16 @@ namespace MultiUsersEditingPlugin
             SelectionColor.A = 1;
             
             IsServer = bs.ReadBoolean();
-            
-            EditingSessionPlugin.Instance.Session.Users.Add(new EditingUser(UserId, Username, SelectionColor, IsServer));
+
+            EditingUser user;
+            EditingSessionPlugin.Instance.Session.Users.Add(user = new EditingUser(UserId, Username, SelectionColor, IsServer));
             EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
             
             Scripting.InvokeOnUpdate(() =>
             {
-                var sessionSelectionOutline = new SessionSelectionOutline(UserId);
-                Editor.Instance.Windows.EditWin.Viewport.Task.CustomPostFx.Add(sessionSelectionOutline);
-                Debug.Log("Outline added");
+                user.Outline = FlaxEngine.Object.New<CustomOutliner>();
+                user.Outline.UserId = UserId;
+                Editor.Instance.Windows.EditWin.Viewport.Task.CustomPostFx.Add(user.Outline);
             });
         }
 

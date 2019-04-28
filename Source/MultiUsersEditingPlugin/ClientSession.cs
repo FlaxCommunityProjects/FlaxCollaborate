@@ -14,7 +14,6 @@ namespace MultiUsersEditingPlugin
 {
     public class ClientSession : EditingSession
     {
-        private int _id;
         private TcpClient _socket;
         private NetworkStream _stream;
         private BinaryReader _reader;
@@ -53,7 +52,8 @@ namespace MultiUsersEditingPlugin
                 _writer.Write(settings.SelectionColor.G);
                 _writer.Write(settings.SelectionColor.B);
                 
-                _id = _reader.ReadInt32();
+                int id = _reader.ReadInt32();
+                User = new EditingUser(id, settings.Username, settings.SelectionColor, false);
                 
                 _thread.IsBackground = true;
                 _thread.Start();
@@ -98,7 +98,7 @@ namespace MultiUsersEditingPlugin
             {
                 try
                 {
-                    _writer.Write(packet.Author);
+                    _writer.Write(User.Id);
                     _writer.Write(packet.IsBroadcasted);
                     _writer.Write(PacketTypeManager.SubclassTypes.First(t => packet.GetType().IsEquivalentTo(t)).Name);
                     packet.Write(_writer);

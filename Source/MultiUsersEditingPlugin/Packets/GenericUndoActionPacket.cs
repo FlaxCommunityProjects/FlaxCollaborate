@@ -23,6 +23,7 @@ namespace MultiUsersEditingPlugin
         public GenericUndoActionPacket(IUndoAction action)
         {
             this._action = action;
+            IsBroadcasted = false;
         }
 
         public override void Read(BinaryReader bs)
@@ -69,9 +70,9 @@ namespace MultiUsersEditingPlugin
 
                         callbackProp.SetValue(selectionChangeAction, callbackLambda);
 
-
+ 
                         EditingSessionPlugin.Instance.Session.GetUserById(Author).Selection =
-                            (undoAction as SelectionChangeAction).Data.After;
+                            selectionChangeAction.Data.After;
                     }
                     else
                     {

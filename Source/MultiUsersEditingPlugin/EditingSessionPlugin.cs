@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -39,9 +40,17 @@ namespace MultiUsersEditingPlugin
                 if (Session == null)
                     return;
 
-
-                    Packet p = new GenericUndoActionPacket(action);
-                    Session.SendPacket(p);
+                if (action is SelectionChangeAction selectionAction)
+                {
+                    if (selectionAction.Data.After.Length != 0 && !Session.CanSelect(selectionAction.Data.After[0].ID))
+                    {
+                        action.Undo();
+                        return;
+                    }
+                }
+                
+                Packet p = new GenericUndoActionPacket(action);
+                Session.SendPacket(p);
                 
             };
         }
@@ -54,7 +63,7 @@ namespace MultiUsersEditingPlugin
             _labelConnected.Dispose();
             base.Deinitialize();
         }
-
+        
         private static EditingSessionPlugin _instance;
 
         public static EditingSessionPlugin Instance

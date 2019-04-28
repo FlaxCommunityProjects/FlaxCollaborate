@@ -52,14 +52,15 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Source\MultiUsersEditingPlugin\BaseSelectionOutline.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\ClientSession.cs" />
+    <Compile Include="Source\MultiUsersEditingPlugin\CustomOutliner.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\EditingSession.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\EditingSessionPlugin.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\EditingUser.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Packet.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\PacketTypeManager.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\ServerSession.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\SessionSelectionOutline.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\SessionSettings.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\UndoActionObjectSerializer.cs" />
     <Compile Include="Source\MultiUsersEditingPlugin\Packets\GenericUndoActionPacket.cs" />
