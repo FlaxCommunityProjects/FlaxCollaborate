@@ -11,7 +11,7 @@ using FlaxEditor.SceneGraph;
 using FlaxEngine;
 using MultiUsersEditing.Source.MultiUsersEditingPlugin;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
     public class ServerSession : EditingSession
     {
@@ -90,16 +90,15 @@ namespace MultiUsersEditingPlugin
                                 {
                                     EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
 
-                                    newEditUser.Outline = FlaxEngine.Object.New<CustomOutliner>();
-                                    newEditUser.Outline.UserId = newEditUser.Id;
-                                    Editor.Instance.Windows.EditWin.Viewport.Task.CustomPostFx.Add(newEditUser.Outline);
+                                    newEditUser.Outliner = FlaxEngine.Object.New<CustomOutliner>();
+                                    newEditUser.Outliner.UserId = newEditUser.Id;
                                 });
                             }
                         }
 
                         foreach (var user in _socketUsers)
                         {
-                            if (!user.Socket.Connected)
+                            if (!user.Socket.Client.Connected)
                             {
                                 _usersToDelete.Add(user);
                                 SendPacket(new UserDisconnectedPacket(user.Id));
@@ -155,33 +154,38 @@ namespace MultiUsersEditingPlugin
             return SendPacket(User.Id, packet);
         }
 
+        private static object _sendLock = new object();
+        
         public bool SendPacket(int senderId, Packet packet)
         {
-            string s = PacketTypeManager.SubclassTypes.First(t => packet.GetType().IsEquivalentTo(t)).Name;
-
-            foreach (var user in _socketUsers)
+            lock (_sendLock)
             {
-                if (user.Socket != null &&
-                    user.Id != packet.Author)
+                string s = PacketTypeManager.SubclassTypes.First(t => packet.GetType().IsEquivalentTo(t)).Name;
+
+                foreach (var user in _socketUsers)
                 {
-                    lock (user.Socket)
+                    if (user.Socket != null &&
+                        user.Id != packet.Author)
                     {
-                        try
+                        lock (user.Socket)
                         {
-                            user.Writer.Write(senderId);
-                            user.Writer.Write(s);
-                            packet.Write(user.Writer);
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogError(e.ToString());
-                            return false;
+                            try
+                            {
+                                user.Writer.Write(senderId);
+                                user.Writer.Write(s);
+                                packet.Write(user.Writer);
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.LogError(e.ToString());
+                                return false;
+                            }
                         }
                     }
                 }
-            }
 
-            return true;
+                return true;
+            }
         }
 
         public override void Close()

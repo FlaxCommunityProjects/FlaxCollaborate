@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Net;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
     public abstract class Packet
     {

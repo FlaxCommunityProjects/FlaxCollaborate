@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
     public class UserDisconnectedPacket : Packet
     {
@@ -19,6 +19,10 @@ namespace MultiUsersEditingPlugin
         public override void Read(BinaryReader bs)
         {
             UserId = bs.ReadInt32();
+
+            var user = EditingSessionPlugin.Instance.Session.GetUserById(UserId);
+            EditingSessionPlugin.Instance.Session.Users.Remove(user);
+            EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
         }
 
         public override void Write(BinaryWriter bw)

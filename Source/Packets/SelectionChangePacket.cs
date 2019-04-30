@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
     public class SelectionChangePacket : Packet
     {

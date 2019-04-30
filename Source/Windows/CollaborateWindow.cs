@@ -6,20 +6,10 @@ using FlaxEngine;
 using FlaxEngine.GUI;
 using FlaxEngine.Rendering;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
     public class CollaborateWindow : CustomEditorWindow
     {
-        private enum State
-        {
-            Join,
-            Host,
-            Session,
-            NoSession
-        }
-
-        private State _state = State.NoSession;
-        
         private SessionSettings _settings;
         private LayoutElementsContainer _layout;
  
@@ -33,7 +23,7 @@ namespace MultiUsersEditingPlugin
         {
             _layout.ContainerControl.DisposeChildren();
             _layout.ContainerControl.AnchorStyle = AnchorStyle.Upper;
-            _state = State.Join;
+            EditingSessionPlugin.Instance.SessionState = EditingSessionPlugin.State.Join;
             _layout.ClearLayout();
             _layout.Space(5);
             var label = _layout.Label("Joining Session", TextAlignment.Center);
@@ -69,7 +59,7 @@ namespace MultiUsersEditingPlugin
         {
             _layout.ContainerControl.DisposeChildren();
             _layout.ContainerControl.AnchorStyle = AnchorStyle.Upper;
-            _state = State.Host;
+            EditingSessionPlugin.Instance.SessionState = EditingSessionPlugin.State.Host;
             _layout.ClearLayout();
             _layout.Space(5);
             var label = _layout.Label("Hosting Session", TextAlignment.Center);
@@ -102,8 +92,11 @@ namespace MultiUsersEditingPlugin
 
         private void showSession()
         {
+            if (_settings == null)
+                _settings = EditingSessionPlugin.Instance.Session.Settings;
+            
             _layout.ContainerControl.DisposeChildren();
-            _state = State.Session;
+            EditingSessionPlugin.Instance.SessionState = EditingSessionPlugin.State.Session;
 
             var vpanel = _layout.ContainerControl.AddChild<VerticalPanel>();
             
@@ -115,6 +108,7 @@ namespace MultiUsersEditingPlugin
             {
                 var label = userList.AddChild<Label>();
                 label.Text = user.Name;
+                label.DockStyle = DockStyle.None;
                 label.TextColor = user.SelectionColor;
                 if (user.IsServer)
                     label.Text += "*";
@@ -142,7 +136,7 @@ namespace MultiUsersEditingPlugin
         private void showNoSession()
         {
             _layout.ContainerControl.DisposeChildren();
-            _state = State.NoSession;
+            EditingSessionPlugin.Instance.SessionState = EditingSessionPlugin.State.NoSession;
             
             int bSize = 100;
             int emptySpace = 25;
@@ -187,18 +181,18 @@ namespace MultiUsersEditingPlugin
 
         public void Rebuild()
         {
-            switch (_state)
+            switch (EditingSessionPlugin.Instance.SessionState)
             {
-                case State.Join:
+                case EditingSessionPlugin.State.Join:
                     showJoin();
                     break;
-                case State.Host:
+                case EditingSessionPlugin.State.Host:
                     showHost();
                     break;
-                case State.Session:
+                case EditingSessionPlugin.State.Session:
                     showSession();
                     break;
-                case State.NoSession:
+                case EditingSessionPlugin.State.NoSession:
                     showNoSession();
                     break;
             }

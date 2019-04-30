@@ -2,12 +2,13 @@
 
 using System;
 using System.Collections.Generic;
+using FlaxEditor;
 using FlaxEditor.Options;
 using FlaxEditor.SceneGraph;
 using FlaxEngine;
 using FlaxEngine.Rendering;
 
-namespace FlaxEditor.Gizmo
+namespace CollaboratePlugin
 {
     /// <summary>
     /// In-build postFx used to render outline for selected objects in editor.

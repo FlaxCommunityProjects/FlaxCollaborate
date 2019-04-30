@@ -4,7 +4,7 @@ using FlaxEditor;
 using FlaxEngine;
 using MultiUsersEditing.Source.MultiUsersEditingPlugin;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
     public class UserConnectedPacket : Packet
     {
@@ -44,9 +44,8 @@ namespace MultiUsersEditingPlugin
             
             Scripting.InvokeOnUpdate(() =>
             {
-                user.Outline = FlaxEngine.Object.New<CustomOutliner>();
-                user.Outline.UserId = UserId;
-                Editor.Instance.Windows.EditWin.Viewport.Task.CustomPostFx.Add(user.Outline);
+                user.Outliner = FlaxEngine.Object.New<CustomOutliner>();
+                user.Outliner.UserId = UserId;
             });
         }
 

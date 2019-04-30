@@ -2,15 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FlaxEditor.SceneGraph;
-using MultiUsersEditingPlugin;
+using CollaboratePlugin;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
     public abstract class EditingSession
     {
         public EditingUser User { get; protected set; }
         
         public List<EditingUser> Users { get; } = new List<EditingUser>();
+        
+        public SessionSettings Settings { get; protected set; }
         
         public abstract bool IsHosting { get; }
 
@@ -26,7 +28,7 @@ namespace MultiUsersEditingPlugin
             {
                 return Users.First((user) => user.Id == id);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return null;
             }

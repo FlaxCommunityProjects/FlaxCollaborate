@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using FlaxEngine;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
     public class TestPacket : Packet
     {

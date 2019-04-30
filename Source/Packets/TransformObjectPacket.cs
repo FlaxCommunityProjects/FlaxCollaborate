@@ -5,7 +5,7 @@ using FlaxEditor.Options;
 using FlaxEditor.SceneGraph;
 using FlaxEngine;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
     public class TransformObjectPacket : Packet
     {

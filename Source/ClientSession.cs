@@ -10,7 +10,7 @@ using FlaxEditor.SceneGraph;
 using FlaxEngine;
 using Microsoft.VisualBasic;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
     public class ClientSession : EditingSession
     {

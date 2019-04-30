@@ -8,7 +8,7 @@ using FlaxEditor.Modules;
 using FlaxEditor.Utilities;
 using FlaxEngine;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
     internal class GenericUndoActionPacket : Packet
     {

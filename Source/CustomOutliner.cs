@@ -2,7 +2,7 @@ using FlaxEditor.Gizmo;
 using FlaxEditor.SceneGraph;
 using FlaxEngine;
 using FlaxEngine.Rendering;
-using MultiUsersEditingPlugin;
+using CollaboratePlugin;
 
 namespace MultiUsersEditing.Source.MultiUsersEditingPlugin
 {
@@ -17,6 +17,7 @@ namespace MultiUsersEditing.Source.MultiUsersEditingPlugin
                 var user = EditingSessionPlugin.Instance.Session.GetUserById(value);
                 _userId = user.Id;
                 SelectionOutlineColor0 = user.SelectionColor;
+                SelectionOutlineColor1 = user.SelectionColor;
 
                 UseEditorOptions = false;
             }

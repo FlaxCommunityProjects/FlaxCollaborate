@@ -7,10 +7,20 @@ using FlaxEditor.GUI;
 using FlaxEngine;
 using FlaxEngine.GUI;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
     public class EditingSessionPlugin : EditorPlugin
     {
+        public enum State
+        {
+            Join,
+            Host,
+            Session,
+            NoSession
+        }
+
+        public State SessionState { get; set; } = State.NoSession;
+        
         public EditingSession Session;
 
         private ContextMenuButton _collaborateButton;
