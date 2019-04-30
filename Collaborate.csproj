@@ -23,7 +23,7 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>DEBUG;FLAX_ASSERTIONS;TRACE;FLAX_0;FLAX_0_4;FLAX_0_4_6181;FLAX_EDITOR;FLAX_WINDOWS;FLAX_EDITOR_WIN</DefineConstants>
-	<UseVSHostingProcess>false</UseVSHostingProcess>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>portable</DebugType>
@@ -34,35 +34,35 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>TRACE;FLAX_0;FLAX_0_4;FLAX_0_4_6181;FLAX_EDITOR;FLAX_WINDOWS;FLAX_EDITOR_WIN</DefineConstants>
-	<UseVSHostingProcess>false</UseVSHostingProcess>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
-	<Reference Include="FlaxEngine">
-		<HintPath>Cache\Assemblies\Release\FlaxEngine.dll</HintPath>
-	</Reference>
-	<Reference Include="Newtonsoft.Json">
-		<HintPath>Cache\Assemblies\Release\Newtonsoft.Json.dll</HintPath>
-	</Reference>
-	<Reference Include="FlaxEditor">
-		<HintPath>Cache\Assemblies\Release\FlaxEditor.dll</HintPath>
-	</Reference>
+    <Reference Include="FlaxEngine">
+      <HintPath>Cache\Assemblies\Release\FlaxEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Cache\Assemblies\Release\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="FlaxEditor">
+      <HintPath>Cache\Assemblies\Release\FlaxEditor.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Source\BaseSelectionOutline.cs" />
     <Compile Include="Source\ClientSession.cs" />
-    <Compile Include="Source\CustomOutliner.cs" />
     <Compile Include="Source\EditingSession.cs" />
     <Compile Include="Source\EditingSessionPlugin.cs" />
     <Compile Include="Source\EditingUser.cs" />
-    <Compile Include="Source\Packet.cs" />
-    <Compile Include="Source\PacketTypeManager.cs" />
+    <Compile Include="Source\Outline\BaseSelectionOutline.cs" />
+    <Compile Include="Source\Outline\CustomOutliner.cs" />
+    <Compile Include="Source\Packets\Packet.cs" />
+    <Compile Include="Source\Packets\PacketTypeManager.cs" />
+    <Compile Include="Source\Packets\UndoActionObjectSerializer.cs" />
     <Compile Include="Source\ServerSession.cs" />
     <Compile Include="Source\SessionSettings.cs" />
-    <Compile Include="Source\UndoActionObjectSerializer.cs" />
     <Compile Include="Source\Packets\GenericUndoActionPacket.cs" />
     <Compile Include="Source\Packets\SelectionChangePacket.cs" />
     <Compile Include="Source\Packets\TestPacket.cs" />
@@ -74,4 +74,4 @@
     <Compile Include="Cache\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-</Project>
+</Project>
