@@ -25,18 +25,16 @@ namespace CollaboratePlugin
 
         private bool _running;
         private TcpListener _server;
-        private IPAddress _address = IPAddress.Parse("127.0.0.1");
         private List<SocketUser> _socketUsers = new List<SocketUser>();
         private Thread _thread;
 
         public override bool IsHosting => true;
 
-
         public override bool Start(SessionSettings settings)
         {
             try
             {
-                _server = new TcpListener(_address, settings.Port);
+                _server = new TcpListener(IPAddress.Any, settings.Port);
                 _server.Start();
 
                 Users.Add(User = new EditingUser(CreateId(settings.Username), settings.Username,
@@ -56,11 +54,11 @@ namespace CollaboratePlugin
                             newSocketUser.Reader = new BinaryReader(newSocketUser.Socket.GetStream());
                             newSocketUser.Writer = new BinaryWriter(newSocketUser.Socket.GetStream());
 
-                            String username = newSocketUser.Reader.ReadString();
+                            string username = newSocketUser.Reader.ReadString();
 
                             var id = CreateId(username);
 
-                            if (id == -1) // Username is already taken -> send the info and drop the user 
+                            if (id == -1) // Username is already taken -> send the info and drop the user
                             {
                                 newSocketUser.Writer.Write(false);
                             }
@@ -110,7 +108,7 @@ namespace CollaboratePlugin
                                 bool broadcasted = user.Reader.ReadBoolean();
                                 string classname = user.Reader.ReadString();
 
-                                Packet p = (Packet) Activator.CreateInstance(
+                                Packet p = (Packet)Activator.CreateInstance(
                                     PacketTypeManager.SubclassTypes.First((t) => t.Name.Equals(classname)));
                                 p.Author = senderId;
                                 p.Read(user.Reader);
@@ -130,7 +128,7 @@ namespace CollaboratePlugin
 
                         if (!_activity)
                             Thread.Sleep(0);
-                        
+
                         _activity = false;
                     }
                 });
@@ -155,7 +153,7 @@ namespace CollaboratePlugin
         }
 
         private static object _sendLock = new object();
-        
+
         public bool SendPacket(int senderId, Packet packet)
         {
             lock (_sendLock)
@@ -198,7 +196,7 @@ namespace CollaboratePlugin
             }
         }
 
-        private int CreateId(String username)
+        private int CreateId(string username)
         {
             int id = username.GetHashCode();
 
