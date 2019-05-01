@@ -27,7 +27,11 @@ namespace CollaboratePlugin
         private Label _labelConnected;
         
         public CollaborateWindow CollaborateWindow { get; private set; }
-        
+
+        // Player position caching
+        private Vector3 Position;
+        private Quaternion Orientation;
+
         public override void InitializeEditor()
         {
             base.InitializeEditor();
@@ -63,10 +67,35 @@ namespace CollaboratePlugin
                 Session.SendPacket(p);
                 
             };
+
+            UserDrawer.Initialize();
+            Scripting.Update += SendPlayerPosition;
+        }
+
+        private void SendPlayerPosition()
+        {
+            if (Session == null)
+                return;
+
+            var wp = Editor.Instance.Windows.EditWin.Viewport;
+
+            var vpos = wp.ViewPosition;
+            var vrot = wp.ViewOrientation;
+            if(vpos != Position || vrot != Orientation)
+            {
+                Position = vpos;
+                Orientation = vrot;
+
+                Packet p = new UserPositionPacket() { Position = vpos, Orientation = vrot };
+                Session.SendPacket(p);
+            }
+            
         }
 
         public override void Deinitialize()
         {
+            Scripting.Update -= SendPlayerPosition;
+            UserDrawer.Deinitialize();
             Session?.Close();
             Session = null;
             _collaborateButton.Dispose();

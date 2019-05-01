@@ -72,6 +72,7 @@
     <Compile Include="Source\Packets\UserDisconnectedPacket.cs" />
     <Compile Include="Source\Packets\UserPositionPacket.cs" />
     <Compile Include="Source\Packets\UsersListPacket.cs" />
+    <Compile Include="Source\UserDrawer\UserDrawer.cs" />
     <Compile Include="Source\Windows\CollaborateWindow.cs" />
     <Compile Include="Cache\AssemblyInfo.cs" />
   </ItemGroup>

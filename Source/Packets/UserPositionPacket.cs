@@ -11,22 +11,29 @@ namespace CollaboratePlugin
     public class UserPositionPacket : Packet
     {
         public Vector3 Position;
-        public Quaternion Rotation;
+        public Quaternion Orientation;
         //public Vector2 ScreenResolution;
         //public Vector2 MousePosition;
+
+        public UserPositionPacket()
+        {
+
+        }
 
         public override void Read(BinaryReader bs)
         {
             Position = bs.ReadVector3();
-            Rotation = bs.ReadQuaternion();
+            Orientation = bs.ReadQuaternion();
             //ScreenResolution = bs.ReadVector2();
             //MousePosition = bs.ReadVector2();
+
+            UserDrawer.ProcessPacket(this);
         }
 
         public override void Write(BinaryWriter bw)
         {
             bw.Write(ref Position);
-            bw.Write(ref Rotation);
+            bw.Write(ref Orientation);
         }
     }
 }
