@@ -29,14 +29,16 @@ namespace CollaboratePlugin
         public override void Read(BinaryReader bs)
         {
             int count = bs.ReadInt32();
-
+            IUndoAction[] actions = new IUndoAction[count];
+            
             for (int i = 0; i < count; i++)
             {
-                ReadSingle(bs);
+                actions[i] = ReadSingle(bs);
             }
+            _action = new MultiUndoAction(actions);
         }
 
-        private void ReadSingle(BinaryReader bs)
+        private IUndoAction ReadSingle(BinaryReader bs)
         {
             string typeName = bs.ReadString();
             string data = bs.ReadString();
@@ -45,8 +47,9 @@ namespace CollaboratePlugin
                 if (typeName == this.ObjectDiffPacket)
                 {
                     //Debug.Log(data);
-                    IUndoAction undoAction = UndoActionObjectSerializer.FromJson(data);
-                    undoAction.Do();
+                    IUndoAction a = UndoActionObjectSerializer.FromJson(data);
+                    a.Do();
+                    return a;
                 }
                 else
                 {
@@ -73,10 +76,13 @@ namespace CollaboratePlugin
  
                         EditingSessionPlugin.Instance.Session.GetUserById(Author).Selection =
                             selectionChangeAction.Data.After;
+
+                        return selectionChangeAction;
                     }
                     else
                     {
                         (undoAction as IUndoAction).Do();
+                        return (IUndoAction)undoAction;
                     }
                     
                     // This might be a slightly bad idea :tm:
@@ -89,6 +95,8 @@ namespace CollaboratePlugin
             {
                 Debug.LogError(e);
             }
+
+            return new MultiUndoAction(new IUndoAction[0]);
         }
 
         public override void Write(BinaryWriter bw)
