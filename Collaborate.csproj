@@ -64,9 +64,6 @@
     <Compile Include="Source\Packets\GenericUndoActionPacket.cs" />
     <Compile Include="Source\Packets\Packet.cs" />
     <Compile Include="Source\Packets\PacketTypeManager.cs" />
-    <Compile Include="Source\Packets\SelectionChangePacket.cs" />
-    <Compile Include="Source\Packets\TestPacket.cs" />
-    <Compile Include="Source\Packets\TransformObjectPacket.cs" />
     <Compile Include="Source\Packets\UndoActionObjectSerializer.cs" />
     <Compile Include="Source\Packets\UserConnectedPacket.cs" />
     <Compile Include="Source\Packets\UserDisconnectedPacket.cs" />

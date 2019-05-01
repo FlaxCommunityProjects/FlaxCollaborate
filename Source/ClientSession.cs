@@ -115,6 +115,7 @@ namespace CollaboratePlugin
 
         public override void Close()
         {
+            SendPacket(new UserDisconnectedPacket(User.Id));
             _running = false;
             _writer.Close();
             _reader.Close();
