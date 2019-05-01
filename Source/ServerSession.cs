@@ -129,7 +129,7 @@ namespace CollaboratePlugin
                         }
 
                         if (!_activity)
-                            Thread.Yield();
+                            Thread.Sleep(0);
                         
                         _activity = false;
                     }

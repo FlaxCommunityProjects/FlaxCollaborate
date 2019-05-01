@@ -88,7 +88,7 @@ namespace CollaboratePlugin
                 }
                 else
                 {
-                    Thread.Yield();
+                    Thread.Sleep(0);
                 }
             }
         }
