@@ -56,6 +56,7 @@
     <Compile Include="Source\EditingSession.cs" />
     <Compile Include="Source\EditingSessionPlugin.cs" />
     <Compile Include="Source\EditingUser.cs" />
+    <Compile Include="Source\SerializationExtensions.cs" />
     <Compile Include="Source\ServerSession.cs" />
     <Compile Include="Source\SessionSettings.cs" />
     <Compile Include="Source\Outline\BaseSelectionOutline.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="Source\Packets\UndoActionObjectSerializer.cs" />
     <Compile Include="Source\Packets\UserConnectedPacket.cs" />
     <Compile Include="Source\Packets\UserDisconnectedPacket.cs" />
+    <Compile Include="Source\Packets\UserPositionPacket.cs" />
     <Compile Include="Source\Packets\UsersListPacket.cs" />
     <Compile Include="Source\Windows\CollaborateWindow.cs" />
     <Compile Include="Cache\AssemblyInfo.cs" />
