@@ -23,7 +23,7 @@ namespace CollaboratePlugin
         public GenericUndoActionPacket(IUndoAction action)
         {
             this._action = action;
-            IsBroadcasted = false;
+            IsBroadcasted = true;
         }
 
         public override void Read(BinaryReader bs)
