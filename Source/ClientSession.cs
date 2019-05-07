@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using FlaxEditor;
 using FlaxEditor.SceneGraph;
 using FlaxEngine;
@@ -20,7 +21,8 @@ namespace CollaboratePlugin
         private BinaryWriter _writer;
         private Thread _thread;
         private bool _running;
-        
+        private readonly object _lockObject = new object();
+
         public override bool IsHosting => false;
 
         public override bool Start(SessionSettings settings)
@@ -38,7 +40,7 @@ namespace CollaboratePlugin
                 _writer = new BinaryWriter(_stream);
                 _reader = new BinaryReader(_stream);
                 _thread = new Thread(ReceiveLoop);
-                
+
                 _writer.Write(settings.Username);
 
                 if (!_reader.ReadBoolean())
@@ -51,13 +53,13 @@ namespace CollaboratePlugin
                 _writer.Write(settings.SelectionColor.R);
                 _writer.Write(settings.SelectionColor.G);
                 _writer.Write(settings.SelectionColor.B);
-                
+
                 int id = _reader.ReadInt32();
                 User = new EditingUser(id, settings.Username, settings.SelectionColor, false);
-                
+
                 _thread.IsBackground = true;
                 _thread.Start();
-                
+
                 Debug.Log("Session client launched !");
             }
             catch (Exception e)
@@ -70,7 +72,7 @@ namespace CollaboratePlugin
         }
 
         private void ReceiveLoop()
-        {  
+        {
             _running = true;
             while (_running)
             {
@@ -81,7 +83,7 @@ namespace CollaboratePlugin
                 else if (_socket.Available != 0)
                 {
                     int senderId = _reader.ReadInt32();
-                    String s = _reader.ReadString();
+                    string s = _reader.ReadString();
                     Packet p = (Packet)Activator.CreateInstance(PacketTypeManager.SubclassTypes.First((t) => t.Name.Equals(s)));
                     p.Author = senderId;
                     p.Read(_reader);
@@ -92,9 +94,10 @@ namespace CollaboratePlugin
                 }
             }
         }
+
         public override bool SendPacket(Packet packet)
         {
-            lock (this)
+            lock (_lockObject)
             {
                 try
                 {
