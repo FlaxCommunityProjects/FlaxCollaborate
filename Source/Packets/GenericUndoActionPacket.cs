@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -96,6 +96,7 @@ namespace CollaboratePlugin
 
                 if (undoAction is SelectionChangeAction selectionChangeAction)
                 {
+                    // Selection change action custom handling
                     var callbackProp = typeof(SelectionChangeAction).GetField("_callback",
                         BindingFlags.NonPublic | BindingFlags.Instance);
                     var callbackMethod = typeof(SceneEditingModule).GetMethod("OnSelectionUndo",
@@ -106,6 +107,8 @@ namespace CollaboratePlugin
 
                     callbackProp.SetValue(selectionChangeAction, callbackLambda);
 
+                    // Don't execute the action, instead do stuff
+                    // TODO: What if some action depends on the current selection?
                     EditingSessionPlugin.Instance.Session.GetUserById(Author).Selection =
                         selectionChangeAction.Data.After;
 
