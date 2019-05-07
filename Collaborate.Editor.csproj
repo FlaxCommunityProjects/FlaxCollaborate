@@ -4,14 +4,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectTypeGuids>{BE633490-FBA4-41EB-80D4-EFA312592B8E};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{3C97D434-E00C-49D2-AE6E-F6FC095E27D6}</ProjectGuid>
+    <ProjectGuid>{313C9B90-1114-412F-8DB7-464CAD579BDD}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AssemblyName>Assembly</AssemblyName>
+    <AssemblyName>Assembly.Editor</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <CompilerResponseFile>
     </CompilerResponseFile>
-    <RootNamespace>MultiUsersEditing</RootNamespace>
+    <RootNamespace>Collaborate</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -52,19 +52,12 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Source\MultiUsersEditingPlugin\ClientSession.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\EditingSessionPlugin.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\GenericUndoActionPacket.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\IEditingSession.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\Packet.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\PacketTypeManager.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\ServerSession.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\SessionSettings.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\TestPacket.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\TransformObjectPacket.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\UndoActionObjectSerializer.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\Windows\HostSessionWindow.cs" />
-    <Compile Include="Source\MultiUsersEditingPlugin\Windows\JoinSessionWindow.cs" />
+    <ProjectReference Include="Collaborate.csproj">
+      <Project>{3C97D434-E00C-49D2-AE6E-F6FC095E27D6}</Project>
+      <Name>Collaborate</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Cache\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

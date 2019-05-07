@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiUsersEditing", "MultiUsersEditing.csproj", "{3C97D434-E00C-49D2-AE6E-F6FC095E27D6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Collaborate", "Collaborate.csproj", "{3C97D434-E00C-49D2-AE6E-F6FC095E27D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiUsersEditing.Editor", "MultiUsersEditing.Editor.csproj", "{313C9B90-1114-412F-8DB7-464CAD579BDD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Collaborate.Editor", "Collaborate.Editor.csproj", "{313C9B90-1114-412F-8DB7-464CAD579BDD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

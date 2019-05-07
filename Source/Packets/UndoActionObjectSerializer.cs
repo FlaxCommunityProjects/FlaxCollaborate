@@ -8,7 +8,7 @@ using FlaxEditor.History;
 using FlaxEditor.Utilities;
 using FlaxEngine;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
     public static class UndoActionObjectSerializer
     {

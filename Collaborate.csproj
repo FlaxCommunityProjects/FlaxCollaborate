@@ -4,14 +4,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectTypeGuids>{BE633490-FBA4-41EB-80D4-EFA312592B8E};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{313C9B90-1114-412F-8DB7-464CAD579BDD}</ProjectGuid>
+    <ProjectGuid>{3C97D434-E00C-49D2-AE6E-F6FC095E27D6}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AssemblyName>Assembly.Editor</AssemblyName>
+    <AssemblyName>Assembly</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <CompilerResponseFile>
     </CompilerResponseFile>
-    <RootNamespace>MultiUsersEditing</RootNamespace>
+    <RootNamespace>Collaborate</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -52,12 +52,25 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="MultiUsersEditing.csproj">
-      <Project>{3C97D434-E00C-49D2-AE6E-F6FC095E27D6}</Project>
-      <Name>MultiUsersEditing</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="Source\ClientSession.cs" />
+    <Compile Include="Source\EditingSession.cs" />
+    <Compile Include="Source\EditingSessionPlugin.cs" />
+    <Compile Include="Source\EditingUser.cs" />
+    <Compile Include="Source\SerializationExtensions.cs" />
+    <Compile Include="Source\ServerSession.cs" />
+    <Compile Include="Source\SessionSettings.cs" />
+    <Compile Include="Source\Outline\BaseSelectionOutline.cs" />
+    <Compile Include="Source\Outline\CustomOutliner.cs" />
+    <Compile Include="Source\Packets\GenericUndoActionPacket.cs" />
+    <Compile Include="Source\Packets\Packet.cs" />
+    <Compile Include="Source\Packets\PacketTypeManager.cs" />
+    <Compile Include="Source\Packets\UndoActionObjectSerializer.cs" />
+    <Compile Include="Source\Packets\UserConnectedPacket.cs" />
+    <Compile Include="Source\Packets\UserDisconnectedPacket.cs" />
+    <Compile Include="Source\Packets\UserPositionPacket.cs" />
+    <Compile Include="Source\Packets\UsersListPacket.cs" />
+    <Compile Include="Source\UserDrawer\UserDrawer.cs" />
+    <Compile Include="Source\Windows\CollaborateWindow.cs" />
     <Compile Include="Cache\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

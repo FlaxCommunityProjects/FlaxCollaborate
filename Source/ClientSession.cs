@@ -1,15 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using FlaxEditor;
+using FlaxEditor.SceneGraph;
 using FlaxEngine;
 using Microsoft.VisualBasic;
 
-namespace MultiUsersEditingPlugin
+namespace CollaboratePlugin
 {
-    public class ClientSession : IEditingSession
+    public class ClientSession : EditingSession
     {
         private TcpClient _socket;
         private NetworkStream _stream;
@@ -17,10 +20,10 @@ namespace MultiUsersEditingPlugin
         private BinaryWriter _writer;
         private Thread _thread;
         private bool _running;
+        
+        public override bool IsHosting => false;
 
-        public bool IsHosting => false;
-
-        public bool Start(SessionSettings settings)
+        public override bool Start(SessionSettings settings)
         {
             try
             {
@@ -34,10 +37,27 @@ namespace MultiUsersEditingPlugin
                 _stream = _socket.GetStream();
                 _writer = new BinaryWriter(_stream);
                 _reader = new BinaryReader(_stream);
-
                 _thread = new Thread(ReceiveLoop);
+                
+                _writer.Write(settings.Username);
+
+                if (!_reader.ReadBoolean())
+                {
+                    Debug.Log("Username already taken, closing connection !");
+                    Close();
+                    return false;
+                }
+
+                _writer.Write(settings.SelectionColor.R);
+                _writer.Write(settings.SelectionColor.G);
+                _writer.Write(settings.SelectionColor.B);
+                
+                int id = _reader.ReadInt32();
+                User = new EditingUser(id, settings.Username, settings.SelectionColor, false);
+                
                 _thread.IsBackground = true;
                 _thread.Start();
+                
                 Debug.Log("Session client launched !");
             }
             catch (Exception e)
@@ -50,7 +70,7 @@ namespace MultiUsersEditingPlugin
         }
 
         private void ReceiveLoop()
-        {
+        {  
             _running = true;
             while (_running)
             {
@@ -60,23 +80,25 @@ namespace MultiUsersEditingPlugin
                 }
                 else if (_socket.Available != 0)
                 {
+                    int senderId = _reader.ReadInt32();
                     String s = _reader.ReadString();
                     Packet p = (Packet)Activator.CreateInstance(PacketTypeManager.SubclassTypes.First((t) => t.Name.Equals(s)));
+                    p.Author = senderId;
                     p.Read(_reader);
                 }
                 else
                 {
-                    Thread.Yield();
+                    Thread.Sleep(0);
                 }
             }
         }
-
-        public bool SendPacket(Packet packet)
+        public override bool SendPacket(Packet packet)
         {
             lock (this)
             {
                 try
                 {
+                    _writer.Write(User.Id);
                     _writer.Write(packet.IsBroadcasted);
                     _writer.Write(PacketTypeManager.SubclassTypes.First(t => packet.GetType().IsEquivalentTo(t)).Name);
                     packet.Write(_writer);
@@ -91,8 +113,9 @@ namespace MultiUsersEditingPlugin
             }
         }
 
-        public void Close()
+        public override void Close()
         {
+            SendPacket(new UserDisconnectedPacket(User.Id));
             _running = false;
             _writer.Close();
             _reader.Close();
