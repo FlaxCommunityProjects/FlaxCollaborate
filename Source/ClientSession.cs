@@ -51,9 +51,8 @@ namespace CollaboratePlugin
                     return false;
                 }
 
-                _writer.Write(settings.SelectionColor.R);
-                _writer.Write(settings.SelectionColor.G);
-                _writer.Write(settings.SelectionColor.B);
+                var color = settings.SelectionColor;
+                _writer.Write(ref color);
 
                 int id = _reader.ReadInt32();
                 User = new EditingUser(id, settings.Username, settings.SelectionColor, false);

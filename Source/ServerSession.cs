@@ -28,7 +28,7 @@ namespace CollaboratePlugin
         private TcpListener _server;
         private List<SocketUser> _socketUsers = new List<SocketUser>();
         private Thread _thread;
-        private ILogger Logger = new Logger(new SelectiveLogHandler()) { FilterLogType = LogType.Log };
+        private ILogger Logger = new Logger(new SelectiveLogHandler()) { FilterLogType = LogType.Log }; // Custom logger
 
         public override bool IsHosting => true;
 
@@ -85,11 +85,7 @@ namespace CollaboratePlugin
                                 newSocketUser.Id = id;
                                 _socketUsers.Add(newSocketUser);
 
-                                var color = new Color();
-                                color.R = newSocketUser.Reader.ReadSingle();
-                                color.G = newSocketUser.Reader.ReadSingle();
-                                color.B = newSocketUser.Reader.ReadSingle();
-                                color.A = 1;
+                                var color = newSocketUser.Reader.ReadColor();
 
                                 newSocketUser.Writer.Write(newSocketUser.Id);
 
