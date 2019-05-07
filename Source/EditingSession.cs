@@ -17,7 +17,7 @@ namespace CollaboratePlugin
 
         public abstract bool IsHosting { get; }
 
-        public abstract bool Start(SessionSettings settings);
+        public abstract Task<bool> Start(SessionSettings settings);
 
         public abstract bool SendPacket(Packet packet);
 

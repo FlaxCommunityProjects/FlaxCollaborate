@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using FlaxEditor;
 using FlaxEditor.SceneGraph;
 using FlaxEngine;
@@ -30,12 +31,21 @@ namespace CollaboratePlugin
 
         public override bool IsHosting => true;
 
-        public override bool Start(SessionSettings settings)
+        public override Task<bool> Start(SessionSettings settings)
         {
             try
             {
-                _server = new TcpListener(IPAddress.Any, settings.Port);
-                _server.Start();
+                try
+                {
+                    _server = new TcpListener(IPAddress.Any, settings.Port);
+                    _server.Start();
+                }
+                catch (SocketException e)
+                {
+                    Debug.LogError("Failed to create the server");
+                    Debug.LogException(e);
+                    return Task.FromResult(false);
+                }
 
                 Users.Add(User = new EditingUser(CreateId(settings.Username), settings.Username,
                     settings.SelectionColor, true));
@@ -46,6 +56,9 @@ namespace CollaboratePlugin
                     _running = true;
                     while (_running)
                     {
+                        // TODO: Heartbeat - to make sure that client disconnections get detected.
+
+                        // If a new user is attempting to connect to the server
                         if (_server.Pending())
                         {
                             _activity = true;
@@ -140,11 +153,11 @@ namespace CollaboratePlugin
             }
             catch (Exception e)
             {
-                Debug.LogError(e.ToString());
-                return false;
+                Debug.LogException(e);
+                return Task.FromResult(false);
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
         public override bool SendPacket(Packet packet)
@@ -162,7 +175,7 @@ namespace CollaboratePlugin
 
                 foreach (var user in _socketUsers)
                 {
-                    if (user.Socket != null &&
+                    if (user.Socket != null && user.Socket.Connected &&
                         user.Id != packet.Author)
                     {
                         lock (user.Socket)
@@ -175,7 +188,8 @@ namespace CollaboratePlugin
                             }
                             catch (Exception e)
                             {
-                                Debug.LogError(e.ToString());
+                                // TODO: Catch the case where the user is disconnected
+                                Debug.LogException(e);
                                 return false;
                             }
                         }

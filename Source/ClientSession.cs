@@ -25,7 +25,7 @@ namespace CollaboratePlugin
 
         public override bool IsHosting => false;
 
-        public override bool Start(SessionSettings settings)
+        public override async Task<bool> Start(SessionSettings settings)
         {
             try
             {
@@ -35,7 +35,8 @@ namespace CollaboratePlugin
                     _stream.Close();
                 }
 
-                _socket = new TcpClient(settings.Host, settings.Port);
+                _socket = new TcpClient();
+                await _socket.ConnectAsync(settings.Host, settings.Port);
                 _stream = _socket.GetStream();
                 _writer = new BinaryWriter(_stream);
                 _reader = new BinaryReader(_stream);
@@ -64,7 +65,7 @@ namespace CollaboratePlugin
             }
             catch (Exception e)
             {
-                Debug.LogError(e.ToString());
+                Debug.LogException(e);
                 return false;
             }
 
@@ -108,7 +109,7 @@ namespace CollaboratePlugin
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e.ToString());
+                    Debug.LogException(e);
                     return false;
                 }
 

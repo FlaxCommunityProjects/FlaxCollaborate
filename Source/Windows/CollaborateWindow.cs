@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using FlaxEditor;
 using FlaxEditor.CustomEditors;
 using FlaxEditor.Windows;
@@ -38,11 +39,15 @@ namespace CollaboratePlugin
             var button = _layout.Button("Join");
             var returnButton = _layout.Button("Return");
 
-            button.Button.Clicked += () =>
+            button.Button.Clicked += async () =>
             {
-                EditingSessionPlugin.Instance.Session = new ClientSession();
-                if (EditingSessionPlugin.Instance.Session.Start(_clientSettings))
+                button.Button.Enabled = false;
+                var session = new ClientSession();
+                bool connected = await session.Start(_serverSettings);
+                button.Button.Enabled = true;
+                if (connected)
                 {
+                    EditingSessionPlugin.Instance.Session = session;
                     ShowSession();
                 }
             };
@@ -68,11 +73,15 @@ namespace CollaboratePlugin
             var button = _layout.Button("Host");
             var returnButton = _layout.Button("Return");
 
-            button.Button.Clicked += () =>
+            button.Button.Clicked += async () =>
             {
-                EditingSessionPlugin.Instance.Session = new ServerSession();
-                if (EditingSessionPlugin.Instance.Session.Start(_serverSettings))
+                button.Button.Enabled = false;
+                var session = new ServerSession();
+                bool connected = await session.Start(_serverSettings);
+                button.Button.Enabled = true;
+                if (connected)
                 {
+                    EditingSessionPlugin.Instance.Session = session;
                     ShowSession();
                 }
             };
