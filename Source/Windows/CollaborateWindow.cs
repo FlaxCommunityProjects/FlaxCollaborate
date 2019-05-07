@@ -43,7 +43,7 @@ namespace CollaboratePlugin
             {
                 button.Button.Enabled = false;
                 var session = new ClientSession();
-                bool connected = await session.Start(_serverSettings);
+                bool connected = await session.Start(_clientSettings);
                 button.Button.Enabled = true;
                 if (connected)
                 {
