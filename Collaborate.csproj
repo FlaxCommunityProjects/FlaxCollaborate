@@ -56,6 +56,7 @@
     <Compile Include="Source\EditingSession.cs" />
     <Compile Include="Source\EditingSessionPlugin.cs" />
     <Compile Include="Source\EditingUser.cs" />
+    <Compile Include="Source\SelectiveLogHandler.cs" />
     <Compile Include="Source\SerializationExtensions.cs" />
     <Compile Include="Source\ServerSession.cs" />
     <Compile Include="Source\SessionSettings.cs" />

@@ -28,6 +28,7 @@ namespace CollaboratePlugin
         private TcpListener _server;
         private List<SocketUser> _socketUsers = new List<SocketUser>();
         private Thread _thread;
+        private ILogger Logger = new Logger(new SelectiveLogHandler()) { FilterLogType = LogType.Log };
 
         public override bool IsHosting => true;
 
@@ -68,6 +69,8 @@ namespace CollaboratePlugin
                             newSocketUser.Writer = new BinaryWriter(newSocketUser.Socket.GetStream());
 
                             string username = newSocketUser.Reader.ReadString();
+
+                            Logger.Log("New User: " + username);
 
                             var id = CreateId(username);
 
