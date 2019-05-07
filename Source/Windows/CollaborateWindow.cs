@@ -11,8 +11,7 @@ namespace CollaboratePlugin
     public class CollaborateWindow : CustomEditorWindow
     {
         private SessionSettings _clientSettings = new SessionSettings();
-        private SessionSettings _serverSettings = new SessionSettings();
-        private SessionSettings _settings;
+        private SessionSettings _serverSettings = new ServerSessionSettings();
         private LayoutElementsContainer _layout;
 
         public override void Initialize(LayoutElementsContainer layout)
@@ -86,8 +85,7 @@ namespace CollaboratePlugin
 
         private void ShowSession()
         {
-            if (_settings == null)
-                _settings = EditingSessionPlugin.Instance.Session.Settings;
+            var settings = EditingSessionPlugin.Instance.Session.Settings;
 
             _layout.ContainerControl.DisposeChildren();
             EditingSessionPlugin.Instance.SessionState = EditingSessionPlugin.State.Session;
@@ -108,9 +106,9 @@ namespace CollaboratePlugin
                     label.Text += "*";
             });
 
-            var settings = vpanel.AddChild<DropPanel>();
-            settings.HeaderText = "Settings";
-            settings.EnableDropDownIcon = true;
+            var settingsPanel = vpanel.AddChild<DropPanel>();
+            settingsPanel.HeaderText = "Settings";
+            settingsPanel.EnableDropDownIcon = true;
 
             var p = vpanel.AddChild<Panel>();
             p.BackgroundColor = Color.Transparent;
