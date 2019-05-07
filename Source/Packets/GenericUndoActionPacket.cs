@@ -26,20 +26,30 @@ namespace CollaboratePlugin
             IsBroadcasted = true;
         }
 
-
         /*
          * DATA LAYOUT
-         * 
+         *
          * is multi undo action = true
          * actions count
          * undo action
          * undo action
          * ...
-         * 
+         *
          * is multi undo action = false
          * undo action
          */
+
         public override void Read(BinaryReader bs)
+        {
+            _action = ReadAction(bs);
+        }
+
+        /// <summary>
+        /// Recursively reads the <see cref="IUndoAction"/>s
+        /// </summary>
+        /// <param name="bs"></param>
+        /// <returns></returns>
+        private IUndoAction ReadAction(BinaryReader bs)
         {
             if (bs.ReadBoolean())
             {
@@ -52,16 +62,21 @@ namespace CollaboratePlugin
                     actions[i] = ReadAction(bs);
                 }
 
-                _action = new MultiUndoAction(actions);
+                return new MultiUndoAction(actions);
             }
             else
             {
                 // just a simple IUndoAction
-                _action = ReadAction(bs);
+                return ReadSimpleAction(bs);
             }
         }
 
-        private IUndoAction ReadAction(BinaryReader bs)
+        /// <summary>
+        /// Reads a simple action. It will never be a <see cref="MultiUndoAction"/>
+        /// </summary>
+        /// <param name="bs"></param>
+        /// <returns></returns>
+        private IUndoAction ReadSimpleAction(BinaryReader bs)
         {
             string typeName = bs.ReadString();
             string data = bs.ReadString();
@@ -87,10 +102,9 @@ namespace CollaboratePlugin
                         BindingFlags.NonPublic | BindingFlags.Instance);
 
                     Action<FlaxEditor.SceneGraph.SceneGraphNode[]> callbackLambda =
-                        (param) => callbackMethod.Invoke(Editor.Instance.SceneEditing, new object[] {param});
+                        (param) => callbackMethod.Invoke(Editor.Instance.SceneEditing, new object[] { param });
 
                     callbackProp.SetValue(selectionChangeAction, callbackLambda);
-
 
                     EditingSessionPlugin.Instance.Session.GetUserById(Author).Selection =
                         selectionChangeAction.Data.After;
@@ -99,43 +113,52 @@ namespace CollaboratePlugin
                 }
                 else
                 {
-                    (undoAction as IUndoAction).Do();
-                    return (IUndoAction) undoAction;
+                    try
+                    {
+                        (undoAction as IUndoAction).Do();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+                    return (IUndoAction)undoAction;
                 }
             }
         }
-
 
         public override void Write(BinaryWriter bw)
         {
-            if (this._action is MultiUndoAction multiUndoAction)
+            WriteAction(bw, this._action);
+        }
+
+        /// <summary>
+        /// Recursively writes the <see cref="IUndoAction"/>s to the output stream
+        /// </summary>
+        /// <param name="bw"></param>
+        /// <param name="action"></param>
+        private void WriteAction(BinaryWriter bw, IUndoAction action)
+        {
+            if (action is MultiUndoAction multiUndoAction)
             {
-                bw.Write(true);
+                bw.Write(true); // It's a MultiUndoAction
                 int actionCount = multiUndoAction.Actions.Length;
                 bw.Write(actionCount);
                 // bw.Write(multiUndoAction.ActionString) // TODO: Action string
-                foreach (var action in multiUndoAction.Actions)
+                foreach (var subAction in multiUndoAction.Actions)
                 {
-                    WriteAction(bw, action);
+                    WriteAction(bw, subAction);
                 }
             }
-            else
+            else if (action is UndoActionObject undoActionObject)
             {
                 bw.Write(false);
-                WriteAction(bw, this._action);
-            }
-        }
-
-        private void WriteAction(BinaryWriter bw, IUndoAction action)
-        {
-            if (action is UndoActionObject undoActionObject)
-            {
                 bw.Write(this.ObjectDiffPacket);
                 bw.Write(UndoActionObjectSerializer.ToJson(undoActionObject));
             }
             else
             {
-                string typeName = _action.GetType().AssemblyQualifiedName;
+                bw.Write(false);
+                string typeName = action.GetType().AssemblyQualifiedName;
                 string data = FlaxEngine.Json.JsonSerializer.Serialize(action);
                 bw.Write(typeName);
                 bw.Write(data);
