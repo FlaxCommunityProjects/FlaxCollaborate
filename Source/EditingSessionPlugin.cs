@@ -20,17 +20,27 @@ namespace CollaboratePlugin
         }
 
         public State SessionState { get; set; } = State.NoSession;
-        
+
         public EditingSession Session;
 
         private ContextMenuButton _collaborateButton;
         private Label _labelConnected;
-        
+
         public CollaborateWindow CollaborateWindow { get; private set; }
 
         // Player position caching
         private Vector3 Position;
+
         private Quaternion Orientation;
+
+        private static EditingSessionPlugin _instance;
+
+        public static EditingSessionPlugin Instance
+        {
+            get => _instance;
+
+            protected set { _instance = value; }
+        }
 
         public override void InitializeEditor()
         {
@@ -42,13 +52,12 @@ namespace CollaboratePlugin
                 CollaborateWindow = new CollaborateWindow();
                 CollaborateWindow.Show();
             };
-            
+
             _labelConnected = Editor.UI.StatusBar.AddChild<Label>();
             _labelConnected.X = Editor.UI.StatusBar.Width - Editor.UI.StatusBar.Width * 0.3f;
             _labelConnected.DockStyle = DockStyle.None;
-            _labelConnected.OnChildControlResized += (control) => { _labelConnected.X = Editor.UI.StatusBar.Width - Editor.UI.StatusBar.Width * 0.3f;};
+            _labelConnected.OnChildControlResized += (control) => { _labelConnected.X = Editor.UI.StatusBar.Width - Editor.UI.StatusBar.Width * 0.3f; };
             _labelConnected.Text = "Disconnected";
-
 
             Editor.Undo.ActionDone += OnActionDone;
             UserDrawer.Initialize();
@@ -64,7 +73,7 @@ namespace CollaboratePlugin
 
             var vpos = wp.ViewPosition;
             var vrot = wp.ViewOrientation;
-            if(vpos != Position || vrot != Orientation)
+            if (vpos != Position || vrot != Orientation)
             {
                 Position = vpos;
                 Orientation = vrot;
@@ -99,21 +108,9 @@ namespace CollaboratePlugin
                     return;
                 }
             }
-                
+
             Packet p = new GenericUndoActionPacket(action);
             Session.SendPacket(p);
-        }
-        
-        private static EditingSessionPlugin _instance;
-
-        public static EditingSessionPlugin Instance
-        {
-            get
-            {
-                return _instance;
-            }
-
-            protected set { _instance = value; }
         }
     }
 }

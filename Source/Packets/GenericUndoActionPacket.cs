@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using FlaxEditor;
+using FlaxEditor.Actions;
 using FlaxEditor.History;
 using FlaxEditor.Modules;
+using FlaxEditor.SceneGraph;
 using FlaxEditor.Utilities;
 using FlaxEngine;
 
@@ -80,53 +83,94 @@ namespace CollaboratePlugin
         {
             string typeName = bs.ReadString();
             string data = bs.ReadString();
+            //Debug.Log(data);
 
-            if (typeName == this.ObjectDiffPacket)
+            // Deserialize the undo action
+            IUndoAction undoAction = DeserializeUndoAction(typeName, data);
+            if (undoAction == null)
             {
-                IUndoAction a = UndoActionObjectSerializer.FromJson(data);
-                a.Do();
-                return a;
+                Debug.LogError($"UndoAction is null. Deserialisation failed for {typeName} - {data}");
+            }
+
+            // Selection change actions need special handling as well
+            if (undoAction is SelectionChangeAction selectionChangeAction)
+            {
+                // Don't execute the action, instead do stuff
+                // TODO: What if some action depends on the current selection?
+                EditingSessionPlugin.Instance.Session.GetUserById(Author).Selection =
+                    selectionChangeAction.Data.After;
+
+                return selectionChangeAction;
             }
             else
             {
-                object undoAction =
+                // Execute the undo action
+                try
+                {
+                    undoAction.Do();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+                return undoAction;
+            }
+        }
+
+        public IUndoAction DeserializeUndoAction(string typeName, string data)
+        {
+            // Handle object modifications, special case
+            if (typeName == this.ObjectDiffPacket)
+            {
+                return UndoActionObjectSerializer.FromJson(data);
+            }
+
+            // Otherwise, generically deserialize it
+            object undoAction =
                     System.Runtime.Serialization.FormatterServices.GetUninitializedObject(Type.GetType(typeName));
 
-                FlaxEngine.Json.JsonSerializer.Deserialize(undoAction, data);
+            FlaxEngine.Json.JsonSerializer.Deserialize(undoAction, data);
 
-                if (undoAction is SelectionChangeAction selectionChangeAction)
+            // Special deserialisation cases for a few undo actions
+            if (undoAction is DeleteActorsAction deleteAction)
+            {
+                // Deleting
+                // Get the actor Guids
+                FieldInfo actorDataField = typeof(DeleteActorsAction).GetField("_data", BindingFlags.NonPublic | BindingFlags.Instance);
+                byte[] actorData = actorDataField.GetValue(deleteAction) as byte[];
+                Guid[] deletedActorGuids = Actor.TryGetSerializedObjectsIds(actorData);
+
+                // Get the nodes in the scene graph
+                var actorNodes = new List<ActorNode>(deletedActorGuids.Length);
+                for (int i = 0; i < deletedActorGuids.Length; i++)
                 {
-                    // Selection change action custom handling
-                    var callbackProp = typeof(SelectionChangeAction).GetField("_callback",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-                    var callbackMethod = typeof(SceneEditingModule).GetMethod("OnSelectionUndo",
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-
-                    Action<FlaxEditor.SceneGraph.SceneGraphNode[]> callbackLambda =
-                        (param) => callbackMethod.Invoke(Editor.Instance.SceneEditing, new object[] { param });
-
-                    callbackProp.SetValue(selectionChangeAction, callbackLambda);
-
-                    // Don't execute the action, instead do stuff
-                    // TODO: What if some action depends on the current selection?
-                    EditingSessionPlugin.Instance.Session.GetUserById(Author).Selection =
-                        selectionChangeAction.Data.After;
-
-                    return selectionChangeAction;
-                }
-                else
-                {
-                    try
+                    var foundNode = SceneGraphFactory.FindNode(deletedActorGuids[i]);
+                    if (foundNode is ActorNode node)
                     {
-                        (undoAction as IUndoAction).Do();
+                        actorNodes.Add(node);
                     }
-                    catch (Exception e)
-                    {
-                        Debug.LogException(e);
-                    }
-                    return (IUndoAction)undoAction;
                 }
+
+                // Set the node parents field (used internally when deleting actors)
+                FieldInfo nodeParentsField = typeof(DeleteActorsAction).GetField("_nodeParents", BindingFlags.NonPublic | BindingFlags.Instance);
+                List<ActorNode> nodeParents = nodeParentsField.GetValue(deleteAction) as List<ActorNode>;
+                actorNodes.BuildNodesParents(nodeParents);
             }
+            else if (undoAction is SelectionChangeAction selectionChangeAction)
+            {
+                // Selection change action custom handling
+                var callbackProp = typeof(SelectionChangeAction).GetField("_callback",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                var callbackMethod = typeof(SceneEditingModule).GetMethod("OnSelectionUndo",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+
+                Action<FlaxEditor.SceneGraph.SceneGraphNode[]> callbackLambda =
+                    (param) => callbackMethod.Invoke(Editor.Instance.SceneEditing, new object[] { param });
+
+                callbackProp.SetValue(selectionChangeAction, callbackLambda);
+            }
+
+            return undoAction as IUndoAction;
         }
 
         public override void Write(BinaryWriter bw)
