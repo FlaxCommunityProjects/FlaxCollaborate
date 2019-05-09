@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using FlaxEditor;
 using FlaxEditor.SceneGraph;
 using FlaxEngine;
@@ -21,10 +22,11 @@ namespace CollaboratePlugin
         private BinaryWriter _writer;
         private Thread _thread;
         private bool _running;
-        
+        private readonly object _lockObject = new object();
+
         public override bool IsHosting => false;
 
-        public override bool Start(SessionSettings settings)
+        public override async Task<bool> Start(SessionSettings settings)
         {
             try
             {
@@ -34,12 +36,13 @@ namespace CollaboratePlugin
                     _stream.Close();
                 }
 
-                _socket = new TcpClient(settings.Host, settings.Port);
+                _socket = new TcpClient();
+                await _socket.ConnectAsync(settings.Host, settings.Port);
                 _stream = _socket.GetStream();
                 _writer = new BinaryWriter(_stream);
                 _reader = new BinaryReader(_stream);
                 _thread = new Thread(ReceiveLoop);
-                
+
                 _writer.Write(settings.Username);
 
                 if (!_reader.ReadBoolean())
@@ -48,7 +51,7 @@ namespace CollaboratePlugin
                     Close();
                     return false;
                 }
-
+                
                 _writer.Write(settings.SelectionColor.R);
                 _writer.Write(settings.SelectionColor.G);
                 _writer.Write(settings.SelectionColor.B);
@@ -63,15 +66,15 @@ namespace CollaboratePlugin
                 
                 int id = _reader.ReadInt32();
                 User = new EditingUser(id, settings.Username, settings.SelectionColor, false, position, orientation);
-                
+
                 _thread.IsBackground = true;
                 _thread.Start();
-                
+
                 Debug.Log("Session client launched !");
             }
             catch (Exception e)
             {
-                Debug.LogError(e.ToString());
+                Debug.LogException(e);
                 return false;
             }
 
@@ -79,7 +82,7 @@ namespace CollaboratePlugin
         }
 
         private void ReceiveLoop()
-        {  
+        {
             _running = true;
             while (_running)
             {
@@ -90,7 +93,7 @@ namespace CollaboratePlugin
                 else if (_socket.Available != 0)
                 {
                     int senderId = _reader.ReadInt32();
-                    String s = _reader.ReadString();
+                    string s = _reader.ReadString();
                     Packet p = (Packet)Activator.CreateInstance(PacketTypeManager.SubclassTypes.First((t) => t.Name.Equals(s)));
                     p.Author = senderId;
                     p.Read(_reader);
@@ -101,9 +104,10 @@ namespace CollaboratePlugin
                 }
             }
         }
+
         public override bool SendPacket(Packet packet)
         {
-            lock (this)
+            lock (_lockObject)
             {
                 try
                 {
@@ -114,7 +118,7 @@ namespace CollaboratePlugin
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e.ToString());
+                    Debug.LogException(e);
                     return false;
                 }
 
@@ -124,9 +128,12 @@ namespace CollaboratePlugin
 
         public override void Close()
         {
-            User.Close();
             Users.ForEach(user => user.Close());
-            SendPacket(new UserDisconnectedPacket(User.Id));
+            if (User != null)
+            {
+                SendPacket(new UserDisconnectedPacket(User.Id));
+                User.Close();
+            }
             _running = false;
             _writer.Close();
             _reader.Close();

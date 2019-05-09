@@ -1,5 +1,5 @@
-﻿using FlaxEngine;
-using System.IO;
+﻿using System.IO;
+using FlaxEngine;
 
 namespace CollaboratePlugin
 {
@@ -49,6 +49,16 @@ namespace CollaboratePlugin
         }
 
         /// <summary>
+        /// Reads the <see cref="Color"/>.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        /// <returns>The read color.</returns>
+        public static Color ReadColor(this BinaryReader reader)
+        {
+            return new Color(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+        }
+
+        /// <summary>
         /// Writes the specified <see cref="Vector2"/>.
         /// </summary>
         /// <param name="writer">The writer.</param>
@@ -63,7 +73,7 @@ namespace CollaboratePlugin
         /// Writes the specified <see cref="Vector3"/>.
         /// </summary>
         /// <param name="writer">The writer.</param>
-        /// <param name="vec2">The vector.</param>
+        /// <param name="vec3">The vector.</param>
         public static void Write(this BinaryWriter writer, ref Vector3 vec3)
         {
             writer.Write(vec3.X);
@@ -75,7 +85,7 @@ namespace CollaboratePlugin
         /// Writes the specified <see cref="Vector4"/>.
         /// </summary>
         /// <param name="writer">The writer.</param>
-        /// <param name="vec2">The vector.</param>
+        /// <param name="vec4">The vector.</param>
         public static void Write(this BinaryWriter writer, ref Vector4 vec4)
         {
             writer.Write(vec4.X);
@@ -88,13 +98,26 @@ namespace CollaboratePlugin
         /// Writes the specified <see cref="Quaternion"/>.
         /// </summary>
         /// <param name="writer">The writer.</param>
-        /// <param name="vec2">The quaternion.</param>
+        /// <param name="q">The quaternion.</param>
         public static void Write(this BinaryWriter writer, ref Quaternion q)
         {
             writer.Write(q.X);
             writer.Write(q.Y);
             writer.Write(q.Z);
             writer.Write(q.W);
+        }
+
+        /// <summary>
+        /// Writes the specified <see cref="Color"/>
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        /// <param name="c">The color.</param>
+        public static void Write(this BinaryWriter writer, ref Color c)
+        {
+            writer.Write(c.R);
+            writer.Write(c.G);
+            writer.Write(c.B);
+            writer.Write(c.A);
         }
     }
 }
