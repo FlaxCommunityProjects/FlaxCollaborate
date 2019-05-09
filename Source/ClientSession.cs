@@ -8,6 +8,7 @@ using System.Threading;
 using FlaxEditor;
 using FlaxEditor.SceneGraph;
 using FlaxEngine;
+using FlaxEngine.Utilities;
 using Microsoft.VisualBasic;
 
 namespace CollaboratePlugin
@@ -52,8 +53,16 @@ namespace CollaboratePlugin
                 _writer.Write(settings.SelectionColor.G);
                 _writer.Write(settings.SelectionColor.B);
                 
+                var wp = Editor.Instance.Windows.EditWin.Viewport;
+
+                var position = wp.ViewPosition;
+                var orientation = wp.ViewOrientation;
+                
+                _writer.Write(ref position);
+                _writer.Write(ref orientation);
+                
                 int id = _reader.ReadInt32();
-                User = new EditingUser(id, settings.Username, settings.SelectionColor, false);
+                User = new EditingUser(id, settings.Username, settings.SelectionColor, false, position, orientation);
                 
                 _thread.IsBackground = true;
                 _thread.Start();
@@ -115,6 +124,8 @@ namespace CollaboratePlugin
 
         public override void Close()
         {
+            User.Close();
+            Users.ForEach(user => user.Close());
             SendPacket(new UserDisconnectedPacket(User.Id));
             _running = false;
             _writer.Close();

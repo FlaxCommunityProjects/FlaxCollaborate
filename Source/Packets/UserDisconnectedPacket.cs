@@ -21,7 +21,8 @@ namespace CollaboratePlugin
             UserId = bs.ReadInt32();
 
             var user = EditingSessionPlugin.Instance.Session.GetUserById(UserId);
-            EditingSessionPlugin.Instance.Session.Users.Remove(user);
+            user.Close();
+            EditingSessionPlugin.Instance.Session.RemoveUser(user);
             EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
         }
 

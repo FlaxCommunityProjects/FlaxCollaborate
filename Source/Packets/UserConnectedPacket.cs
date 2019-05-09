@@ -12,18 +12,22 @@ namespace CollaboratePlugin
         public String Username;
         public bool IsServer;
         public Color SelectionColor;
+        public Vector3 Position;
+        public Quaternion Orientation;
         
         public UserConnectedPacket()
         {
             
         }
 
-        public UserConnectedPacket(int id, String username, Color selectionColor, bool isServer)
+        public UserConnectedPacket(int id, String username, Color selectionColor, bool isServer, Vector3 position, Quaternion orientation)
         {
             UserId = id;
             Username = username;
             IsServer = isServer;
             SelectionColor = selectionColor;
+            Position = position;
+            Orientation = orientation;
         }
         
         public override void Read(BinaryReader bs)
@@ -38,8 +42,11 @@ namespace CollaboratePlugin
             
             IsServer = bs.ReadBoolean();
 
+            Position = bs.ReadVector3();
+            Orientation = bs.ReadQuaternion();
+
             EditingUser user;
-            EditingSessionPlugin.Instance.Session.Users.Add(user = new EditingUser(UserId, Username, SelectionColor, IsServer));
+            EditingSessionPlugin.Instance.Session.AddUser(user = new EditingUser(UserId, Username, SelectionColor, IsServer, Position, Orientation));
             EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
             
             Scripting.InvokeOnUpdate(() =>
@@ -57,6 +64,8 @@ namespace CollaboratePlugin
             bw.Write(SelectionColor.G);
             bw.Write(SelectionColor.B);
             bw.Write(IsServer);
+            bw.Write(ref Position);
+            bw.Write(ref Orientation);
         }
     }
 }

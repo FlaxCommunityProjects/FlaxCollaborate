@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using FlaxEditor.SceneGraph;
 using CollaboratePlugin;
+using FlaxEngine.Utilities;
 
 namespace CollaboratePlugin
 {
@@ -10,8 +12,13 @@ namespace CollaboratePlugin
     {
         public EditingUser User { get; protected set; }
         
-        public List<EditingUser> Users { get; } = new List<EditingUser>();
-        
+        private List<EditingUser> _users = new List<EditingUser>();
+
+        public ReadOnlyCollection<EditingUser> Users
+        {
+            get { return _users.AsReadOnly(); }
+        }
+
         public SessionSettings Settings { get; protected set; }
         
         public abstract bool IsHosting { get; }
@@ -49,6 +56,28 @@ namespace CollaboratePlugin
             });
 
             return match;
+        }
+
+        public void RemoveUser(int id)
+        {
+            var u = GetUserById(id);
+            u.Close();
+            _users.Remove(u);
+        }
+
+        public void RemoveUser(EditingUser user)
+        {
+            _users.Remove(user);
+        }
+
+        public void AddUser(EditingUser u)
+        {
+            _users.Add(u);
+        }
+
+        public void UpdateUsers(List<EditingUser> users)
+        {
+            _users = users;
         }
     }
 }

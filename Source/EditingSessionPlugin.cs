@@ -6,6 +6,7 @@ using FlaxEditor;
 using FlaxEditor.GUI;
 using FlaxEngine;
 using FlaxEngine.GUI;
+using Object = FlaxEngine.Object;
 
 namespace CollaboratePlugin
 {
@@ -28,10 +29,9 @@ namespace CollaboratePlugin
         
         public CollaborateWindow CollaborateWindow { get; private set; }
 
-        // Player position caching
-        private Vector3 Position;
-        private Quaternion Orientation;
-
+        public Model CameraModel;
+        public Material CameraMaterial;
+        
         public override void InitializeEditor()
         {
             base.InitializeEditor();
@@ -51,10 +51,29 @@ namespace CollaboratePlugin
 
 
             Editor.Undo.ActionDone += OnActionDone;
-            UserDrawer.Initialize();
+            
+            CameraMaterial = Content.LoadAsync<Material>(StringUtils.CombinePaths(Globals.ContentFolder, "M_RemoteCamera.flax"));
+            CameraModel = Content.LoadAsyncInternal<Model>("Editor/Camera/O_Camera");
+            Editor.Instance.Windows.EditWin.Viewport.RenderTask.Draw += DrawUsers;
             Scripting.Update += SendPlayerPosition;
         }
 
+        private object drawLocker = new object();
+        private void DrawUsers(FlaxEngine.Rendering.DrawCallsCollector collector)
+        {
+            if (CameraModel == null || CameraModel.LoadedLODs == 0 || Session == null)
+                return;
+
+            lock (drawLocker)
+            {
+                foreach (var user in Session.Users)
+                {
+                    if(user.Material != null)
+                        collector.AddDrawCall(CameraModel.LODs[0].Meshes[0], user.Material, ref user.Transform, StaticFlags.None, false);
+                }
+            }
+        }
+        
         private void SendPlayerPosition()
         {
             if (Session == null)
@@ -64,10 +83,10 @@ namespace CollaboratePlugin
 
             var vpos = wp.ViewPosition;
             var vrot = wp.ViewOrientation;
-            if(vpos != Position || vrot != Orientation)
+            if(vpos != Session.User.Position || vrot != Session.User.Orientation)
             {
-                Position = vpos;
-                Orientation = vrot;
+                Session.User.Position = vpos;
+                Session.User.Orientation = vrot;
 
                 Packet p = new UserPositionPacket() { Position = vpos, Orientation = vrot };
                 Session.SendPacket(p);
@@ -76,9 +95,15 @@ namespace CollaboratePlugin
 
         public override void Deinitialize()
         {
+            Editor.Instance.Windows.EditWin.Viewport.RenderTask.Draw -= DrawUsers;
+
+            Object.Destroy(CameraModel);
+            Object.Destroy(CameraMaterial);
+
+            Session.Close();
+
             Editor.Undo.ActionDone -= OnActionDone;
             Scripting.Update -= SendPlayerPosition;
-            UserDrawer.Deinitialize();
             Session?.Close();
             Session = null;
             _collaborateButton.Dispose();

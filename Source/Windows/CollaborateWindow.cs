@@ -1,10 +1,12 @@
 using System;
 using FlaxEditor;
 using FlaxEditor.CustomEditors;
+using FlaxEditor.GUI;
 using FlaxEditor.Windows;
 using FlaxEngine;
 using FlaxEngine.GUI;
 using FlaxEngine.Rendering;
+using FlaxEngine.Utilities;
 
 namespace CollaboratePlugin
 {
@@ -92,6 +94,8 @@ namespace CollaboratePlugin
 
         private void showSession()
         {
+            var tableHeaderColor = new Color(60, 60, 60);
+            
             if (_settings == null)
                 _settings = EditingSessionPlugin.Instance.Session.Settings;
             
@@ -99,21 +103,52 @@ namespace CollaboratePlugin
             EditingSessionPlugin.Instance.SessionState = EditingSessionPlugin.State.Session;
 
             var vpanel = _layout.ContainerControl.AddChild<VerticalPanel>();
+            vpanel.Width = _layout.ContainerControl.Width;
             
-            var userList = vpanel.AddChild<DropPanel>();
-            userList.HeaderText = "Users List";
-            userList.EnableDropDownIcon = true;
+            var userDropPanel = vpanel.AddChild<DropPanel>();
+            userDropPanel.HeaderText = "Users List";
+            userDropPanel.EnableDropDownIcon = true;
+            userDropPanel.Width = vpanel.Width;
+            
+            var userTable = userDropPanel.AddChild<Table>();
+            userTable.Width = userDropPanel.Width;
+            
+            var nameDef = new ColumnDefinition();
+            nameDef.Title = "Display Name";
+            nameDef.CellAlignment = TextAlignment.Near;
+            nameDef.TitleBackgroundColor = tableHeaderColor;
+            
+            var actionDef = new ColumnDefinition();
+            actionDef.Title = "Actions";
+            actionDef.CellAlignment = TextAlignment.Near;
+            actionDef.TitleBackgroundColor = tableHeaderColor;
+            
+            userTable.Columns = new[] {nameDef, actionDef};
             
             EditingSessionPlugin.Instance.Session.Users.ForEach((user) =>
             {
-                var label = userList.AddChild<Label>();
-                label.Text = user.Name;
-                label.DockStyle = DockStyle.None;
-                label.TextColor = user.SelectionColor;
+                var name = user.Name;
+                
                 if (user.IsServer)
-                    label.Text += "*";
+                    name += " (Server)";
+                if (user.Id == EditingSessionPlugin.Instance.Session.User.Id)
+                    name += " (You)";
+                
+                var row = new Row()
+                {
+                    Values = new object[]
+                    {
+                        user.Name,
+                        "No actions"
+                    },
+                    Parent = userTable,
+                };
             });
 
+            var history = vpanel.AddChild<DropPanel>();
+            history.HeaderText = "History";
+            history.EnableDropDownIcon = true;
+            
             var settings = vpanel.AddChild<DropPanel>();
             settings.HeaderText = "Settings";
             settings.EnableDropDownIcon = true;
@@ -130,6 +165,7 @@ namespace CollaboratePlugin
                 showNoSession();
             };
             
+            userDropPanel.PerformLayout(true);
             _layout.ContainerControl.PerformLayout(true);
         }
 

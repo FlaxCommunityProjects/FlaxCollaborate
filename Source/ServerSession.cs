@@ -9,6 +9,7 @@ using System.Threading;
 using FlaxEditor;
 using FlaxEditor.SceneGraph;
 using FlaxEngine;
+using FlaxEngine.Utilities;
 using MultiUsersEditing.Source.MultiUsersEditingPlugin;
 
 namespace CollaboratePlugin
@@ -37,8 +38,13 @@ namespace CollaboratePlugin
                 _server = new TcpListener(IPAddress.Any, settings.Port);
                 _server.Start();
 
-                Users.Add(User = new EditingUser(CreateId(settings.Username), settings.Username,
-                    settings.SelectionColor, true));
+                var wp = Editor.Instance.Windows.EditWin.Viewport;
+
+                var pos = wp.ViewPosition;
+                var ori = wp.ViewOrientation;
+                
+                AddUser(User = new EditingUser(CreateId(settings.Username), settings.Username,
+                    settings.SelectionColor, true, pos, ori));
                 _thread = new Thread(() =>
                 {
                     List<SocketUser> _usersToDelete = new List<SocketUser>();
@@ -75,15 +81,18 @@ namespace CollaboratePlugin
                                 color.B = newSocketUser.Reader.ReadSingle();
                                 color.A = 1;
 
+                                var position = newSocketUser.Reader.ReadVector3();
+                                var orientation = newSocketUser.Reader.ReadQuaternion();
+                                
                                 newSocketUser.Writer.Write(newSocketUser.Id);
 
                                 // Send hosting user info
                                 var p = new UsersListPacket(Users);
                                 SendPacket(p);
 
-                                EditingUser newEditUser = new EditingUser(id, username, color, false);
-                                Users.Add(newEditUser);
-                                SendPacket(id, new UserConnectedPacket(id, username, color, false));
+                                EditingUser newEditUser = new EditingUser(id, username, color, false, position, orientation);
+                                AddUser(newEditUser);
+                                SendPacket(id, new UserConnectedPacket(id, username, color, false, position, orientation));
                                 Scripting.InvokeOnUpdate(() =>
                                 {
                                     EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
@@ -122,7 +131,10 @@ namespace CollaboratePlugin
 
                         if (_usersToDelete.Count != 0)
                         {
-                            _usersToDelete.ForEach((user) => _socketUsers.Remove(user));
+                            _usersToDelete.ForEach((user) =>
+                            {
+                                _socketUsers.Remove(user);
+                            });
                             _usersToDelete.Clear();
                         }
 
@@ -188,6 +200,8 @@ namespace CollaboratePlugin
 
         public override void Close()
         {
+            User.Close();
+            Users.ForEach(user => user.Close());
             _running = false;
             _server.Stop();
             foreach (var user in _socketUsers)

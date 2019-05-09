@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using FlaxEditor;
 using FlaxEditor.SceneGraph;
 using FlaxEngine;
@@ -16,20 +18,19 @@ namespace CollaboratePlugin
             
         }
         
-        public UsersListPacket(List<EditingUser> usersList)
+        public UsersListPacket(ReadOnlyCollection<EditingUser> usersList)
         {
-            UsersList = usersList;
+            UsersList = usersList.AsEnumerable().ToList();
         }
         
         public override void Read(BinaryReader bs)
         {
-            EditingSessionPlugin.Instance.Session.Users.Clear();
             int count = bs.ReadInt32();
             for (int i = 0; i < count; i++)
             {
                 string suser = bs.ReadString();
                 var user = FlaxEngine.Json.JsonSerializer.Deserialize<EditingUser>(suser);
-                EditingSessionPlugin.Instance.Session.Users.Add(user);
+                EditingSessionPlugin.Instance.Session.AddUser(user);
                 
                 Scripting.InvokeOnUpdate(() =>
                 {
