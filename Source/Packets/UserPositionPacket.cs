@@ -12,8 +12,6 @@ namespace CollaboratePlugin
     {
         public Vector3 Position;
         public Quaternion Orientation;
-        //public Vector2 ScreenResolution;
-        //public Vector2 MousePosition;
 
         public UserPositionPacket()
         {
@@ -24,10 +22,14 @@ namespace CollaboratePlugin
         {
             Position = bs.ReadVector3();
             Orientation = bs.ReadQuaternion();
-            //ScreenResolution = bs.ReadVector2();
-            //MousePosition = bs.ReadVector2();
 
-            UserDrawer.ProcessPacket(this);
+            Scripting.InvokeOnUpdate(() =>
+            {
+                var user = EditingSessionPlugin.Instance.Session.GetUserById(Author);
+                user.Position = Position;
+                user.Orientation = Orientation;
+            });
+            
         }
 
         public override void Write(BinaryWriter bw)

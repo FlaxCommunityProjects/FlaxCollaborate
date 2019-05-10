@@ -132,6 +132,7 @@ namespace CollaboratePlugin
                 
                 if (user.IsServer)
                     name += " (Server)";
+                
                 if (user.Id == EditingSessionPlugin.Instance.Session.User.Id)
                     name += " (You)";
                 
@@ -143,6 +144,7 @@ namespace CollaboratePlugin
                         "No actions"
                     },
                     Parent = userTable,
+                    
                 };
             });
             

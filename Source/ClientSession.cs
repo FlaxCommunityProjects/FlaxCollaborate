@@ -51,11 +51,10 @@ namespace CollaboratePlugin
                     Close();
                     return false;
                 }
-                
-                _writer.Write(settings.SelectionColor.R);
-                _writer.Write(settings.SelectionColor.G);
-                _writer.Write(settings.SelectionColor.B);
-                
+
+                var c = settings.SelectionColor;
+                _writer.Write(ref c);
+
                 var wp = Editor.Instance.Windows.EditWin.Viewport;
 
                 var position = wp.ViewPosition;
