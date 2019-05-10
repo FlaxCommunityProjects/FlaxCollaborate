@@ -49,11 +49,13 @@ namespace CollaboratePlugin
                     return Task.FromResult(false);
                 }
 
+                EditingSessionPlugin.Instance.EditorModeEnter += ExecuteBacklog;
+
                 var wp = Editor.Instance.Windows.EditWin.Viewport;
 
                 var pos = wp.ViewPosition;
                 var ori = wp.ViewOrientation;
-                
+
                 AddUser(User = new EditingUser(CreateId(settings.Username), settings.Username,
                     settings.SelectionColor, true, pos, ori));
                 _thread = new Thread(() =>
@@ -95,7 +97,7 @@ namespace CollaboratePlugin
 
                                 var position = newSocketUser.Reader.ReadVector3();
                                 var orientation = newSocketUser.Reader.ReadQuaternion();
-                                
+
                                 newSocketUser.Writer.Write(newSocketUser.Id);
 
                                 // Send hosting user info
@@ -133,6 +135,14 @@ namespace CollaboratePlugin
                                     PacketTypeManager.SubclassTypes.First((t) => t.Name.Equals(classname)));
                                 p.Author = senderId;
                                 p.Read(user.Reader);
+                                if (EditingSessionPlugin.Instance.IsPlayMode)
+                                {
+                                    _backlog.AddLast(p);
+                                }
+                                else
+                                {
+                                    p.Execute();
+                                }
 
                                 if (broadcasted)
                                 {
@@ -215,6 +225,7 @@ namespace CollaboratePlugin
         {
             User.Close();
             Users.ForEach(user => user.Close());
+            EditingSessionPlugin.Instance.EditorModeEnter -= ExecuteBacklog;
             _running = false;
             _server.Stop();
             foreach (var user in _socketUsers)
