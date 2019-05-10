@@ -4,8 +4,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CollaboratePlugin;
-using FlaxEngine.Utilities;
 using FlaxEditor.SceneGraph;
+using FlaxEngine.Utilities;
 
 namespace CollaboratePlugin
 {
@@ -14,6 +14,8 @@ namespace CollaboratePlugin
         public EditingUser User { get; protected set; }
 
         private List<EditingUser> _users = new List<EditingUser>();
+
+        protected readonly LinkedList<Packet> _backlog = new LinkedList<Packet>();
 
         public ReadOnlyCollection<EditingUser> Users
         {
@@ -28,7 +30,17 @@ namespace CollaboratePlugin
 
         public abstract bool SendPacket(Packet packet);
 
+        // TODO: IDisposeable?
         public abstract void Close();
+
+        protected void ExecuteBacklog()
+        {
+            foreach (var packet in _backlog)
+            {
+                packet.Execute();
+            }
+            _backlog.Clear();
+        }
 
         public EditingUser GetUserById(int id)
         {

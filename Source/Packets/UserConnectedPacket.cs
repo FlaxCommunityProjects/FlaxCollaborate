@@ -14,10 +14,9 @@ namespace CollaboratePlugin
         public Color SelectionColor;
         public Vector3 Position;
         public Quaternion Orientation;
-        
+
         public UserConnectedPacket()
         {
-            
         }
 
         public UserConnectedPacket(int id, String username, Color selectionColor, bool isServer, Vector3 position, Quaternion orientation)
@@ -29,7 +28,7 @@ namespace CollaboratePlugin
             Position = position;
             Orientation = orientation;
         }
-        
+
         public override void Read(BinaryReader bs)
         {
             UserId = bs.ReadInt32();
@@ -39,21 +38,11 @@ namespace CollaboratePlugin
             SelectionColor.G = bs.ReadSingle();
             SelectionColor.B = bs.ReadSingle();
             SelectionColor.A = 1;
-            
+
             IsServer = bs.ReadBoolean();
 
             Position = bs.ReadVector3();
             Orientation = bs.ReadQuaternion();
-
-            EditingUser user;
-            EditingSessionPlugin.Instance.Session.AddUser(user = new EditingUser(UserId, Username, SelectionColor, IsServer, Position, Orientation));
-            EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
-            
-            Scripting.InvokeOnUpdate(() =>
-            {
-                user.Outliner = FlaxEngine.Object.New<CustomOutliner>();
-                user.Outliner.UserId = UserId;
-            });
         }
 
         public override void Write(BinaryWriter bw)
@@ -66,6 +55,19 @@ namespace CollaboratePlugin
             bw.Write(IsServer);
             bw.Write(ref Position);
             bw.Write(ref Orientation);
+        }
+
+        public override void Execute()
+        {
+            EditingUser user;
+            EditingSessionPlugin.Instance.Session.AddUser(user = new EditingUser(UserId, Username, SelectionColor, IsServer, Position, Orientation));
+            EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
+
+            Scripting.InvokeOnUpdate(() =>
+            {
+                user.Outliner = FlaxEngine.Object.New<CustomOutliner>();
+                user.Outliner.UserId = UserId;
+            });
         }
     }
 }

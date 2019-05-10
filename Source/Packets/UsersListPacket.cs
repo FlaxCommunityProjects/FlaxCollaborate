@@ -12,31 +12,25 @@ namespace CollaboratePlugin
     public class UsersListPacket : Packet
     {
         public List<EditingUser> UsersList;
-        
+
         public UsersListPacket()
         {
-            
         }
-        
+
         public UsersListPacket(ReadOnlyCollection<EditingUser> usersList)
         {
             UsersList = usersList.AsEnumerable().ToList();
         }
-        
+
         public override void Read(BinaryReader bs)
         {
+            UsersList = new List<EditingUser>();
             int count = bs.ReadInt32();
             for (int i = 0; i < count; i++)
             {
                 string suser = bs.ReadString();
                 var user = FlaxEngine.Json.JsonSerializer.Deserialize<EditingUser>(suser);
-                EditingSessionPlugin.Instance.Session.AddUser(user);
-                
-                Scripting.InvokeOnUpdate(() =>
-                {
-                    user.Outliner = Object.New<CustomOutliner>();
-                    user.Outliner.UserId = user.Id;
-                });
+                UsersList.Add(user);
             }
         }
 
@@ -48,6 +42,20 @@ namespace CollaboratePlugin
                 string data = FlaxEngine.Json.JsonSerializer.Serialize(user);
                 bw.Write(data);
             });
+        }
+
+        public override void Execute()
+        {
+            foreach (var user in UsersList)
+            {
+                EditingSessionPlugin.Instance.Session.AddUser(user);
+
+                Scripting.InvokeOnUpdate(() =>
+                {
+                    user.Outliner = Object.New<CustomOutliner>();
+                    user.Outliner.UserId = user.Id;
+                });
+            }
         }
     }
 }

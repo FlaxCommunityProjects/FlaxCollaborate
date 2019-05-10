@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -92,29 +92,7 @@ namespace CollaboratePlugin
                 Debug.LogError($"UndoAction is null. Deserialisation failed for {typeName} - {data}");
             }
 
-            // Selection change actions need special handling as well
-            if (undoAction is SelectionChangeAction selectionChangeAction)
-            {
-                // Don't execute the action, instead do stuff
-                // TODO: What if some action depends on the current selection?
-                EditingSessionPlugin.Instance.Session.GetUserById(Author).Selection =
-                    selectionChangeAction.Data.After;
-
-                return selectionChangeAction;
-            }
-            else
-            {
-                // Execute the undo action
-                try
-                {
-                    undoAction.Do();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                }
-                return undoAction;
-            }
+            return undoAction;
         }
 
         public IUndoAction DeserializeUndoAction(string typeName, string data)
@@ -134,27 +112,31 @@ namespace CollaboratePlugin
             // Special deserialisation cases for a few undo actions
             if (undoAction is DeleteActorsAction deleteAction)
             {
-                // Deleting
-                // Get the actor Guids
-                FieldInfo actorDataField = typeof(DeleteActorsAction).GetField("_data", BindingFlags.NonPublic | BindingFlags.Instance);
-                byte[] actorData = actorDataField.GetValue(deleteAction) as byte[];
-                Guid[] deletedActorGuids = Actor.TryGetSerializedObjectsIds(actorData);
-
-                // Get the nodes in the scene graph
-                var actorNodes = new List<ActorNode>(deletedActorGuids.Length);
-                for (int i = 0; i < deletedActorGuids.Length; i++)
-                {
-                    var foundNode = SceneGraphFactory.FindNode(deletedActorGuids[i]);
-                    if (foundNode is ActorNode node)
-                    {
-                        actorNodes.Add(node);
-                    }
-                }
-
-                // Set the node parents field (used internally when deleting actors)
+                // Get node parents
                 FieldInfo nodeParentsField = typeof(DeleteActorsAction).GetField("_nodeParents", BindingFlags.NonPublic | BindingFlags.Instance);
                 List<ActorNode> nodeParents = nodeParentsField.GetValue(deleteAction) as List<ActorNode>;
-                actorNodes.BuildNodesParents(nodeParents);
+                if (nodeParents == null || nodeParents.Count <= 0)
+                {
+                    // Deleting
+                    // Get the actor Guids
+                    FieldInfo actorDataField = typeof(DeleteActorsAction).GetField("_data", BindingFlags.NonPublic | BindingFlags.Instance);
+                    byte[] actorData = actorDataField.GetValue(deleteAction) as byte[];
+                    Guid[] deletedActorGuids = Actor.TryGetSerializedObjectsIds(actorData);
+
+                    // Get the nodes in the scene graph
+                    var actorNodes = new List<ActorNode>(deletedActorGuids.Length);
+                    for (int i = 0; i < deletedActorGuids.Length; i++)
+                    {
+                        var foundNode = SceneGraphFactory.FindNode(deletedActorGuids[i]);
+                        if (foundNode is ActorNode node)
+                        {
+                            actorNodes.Add(node);
+                        }
+                    }
+
+                    // Set the node parents field (used internally when deleting actors)
+                    actorNodes.BuildNodesParents(nodeParents);
+                }
             }
             else if (undoAction is SelectionChangeAction selectionChangeAction)
             {
@@ -164,7 +146,7 @@ namespace CollaboratePlugin
                 var callbackMethod = typeof(SceneEditingModule).GetMethod("OnSelectionUndo",
                     BindingFlags.NonPublic | BindingFlags.Instance);
 
-                Action<FlaxEditor.SceneGraph.SceneGraphNode[]> callbackLambda =
+                Action<SceneGraphNode[]> callbackLambda =
                     (param) => callbackMethod.Invoke(Editor.Instance.SceneEditing, new object[] { param });
 
                 callbackProp.SetValue(selectionChangeAction, callbackLambda);
@@ -209,6 +191,50 @@ namespace CollaboratePlugin
                 string data = FlaxEngine.Json.JsonSerializer.Serialize(action);
                 bw.Write(typeName);
                 bw.Write(data);
+            }
+        }
+
+        public override void Execute()
+        {
+            ExecuteAction(_action);
+        }
+
+        private void ExecuteAction(IUndoAction action)
+        {
+            if (action is MultiUndoAction multiUndoAction)
+            {
+                for (int i = 0; i < multiUndoAction.Actions.Length; i++)
+                {
+                    ExecuteAction(multiUndoAction.Actions[i]);
+                }
+            }
+            else
+            {
+                ExecuteSimpleAction(action);
+            }
+        }
+
+        private void ExecuteSimpleAction(IUndoAction undoAction)
+        {
+            // Selection change actions need special handling as well
+            if (undoAction is SelectionChangeAction selectionChangeAction)
+            {
+                // Don't execute the action, instead do stuff
+                // TODO: What if some action depends on the current selection?
+                EditingSessionPlugin.Instance.Session.GetUserById(Author).Selection =
+                    selectionChangeAction.Data.After;
+            }
+            else
+            {
+                // Execute the undo action
+                try
+                {
+                    undoAction.Do();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
             }
         }
     }

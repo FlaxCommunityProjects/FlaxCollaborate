@@ -1,10 +1,10 @@
-﻿using FlaxEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FlaxEngine;
 
 namespace CollaboratePlugin
 {
@@ -17,7 +17,6 @@ namespace CollaboratePlugin
 
         public UserPositionPacket()
         {
-
         }
 
         public override void Read(BinaryReader bs)
@@ -26,14 +25,17 @@ namespace CollaboratePlugin
             Orientation = bs.ReadQuaternion();
             //ScreenResolution = bs.ReadVector2();
             //MousePosition = bs.ReadVector2();
-
-            UserDrawer.ProcessPacket(this);
         }
 
         public override void Write(BinaryWriter bw)
         {
             bw.Write(ref Position);
             bw.Write(ref Orientation);
+        }
+
+        public override void Execute()
+        {
+            UserDrawer.ProcessPacket(this);
         }
     }
 }

@@ -43,6 +43,8 @@ namespace CollaboratePlugin
                 _reader = new BinaryReader(_stream);
                 _thread = new Thread(ReceiveLoop);
 
+                EditingSessionPlugin.Instance.EditorModeEnter += ExecuteBacklog;
+
                 _writer.Write(settings.Username);
 
                 if (!_reader.ReadBoolean())
@@ -51,19 +53,18 @@ namespace CollaboratePlugin
                     Close();
                     return false;
                 }
-                
-                _writer.Write(settings.SelectionColor.R);
-                _writer.Write(settings.SelectionColor.G);
-                _writer.Write(settings.SelectionColor.B);
-                
+
+                var color = settings.SelectionColor;
+                _writer.Write(ref color);
+
                 var wp = Editor.Instance.Windows.EditWin.Viewport;
 
                 var position = wp.ViewPosition;
                 var orientation = wp.ViewOrientation;
-                
+
                 _writer.Write(ref position);
                 _writer.Write(ref orientation);
-                
+
                 int id = _reader.ReadInt32();
                 User = new EditingUser(id, settings.Username, settings.SelectionColor, false, position, orientation);
 
@@ -97,6 +98,14 @@ namespace CollaboratePlugin
                     Packet p = (Packet)Activator.CreateInstance(PacketTypeManager.SubclassTypes.First((t) => t.Name.Equals(s)));
                     p.Author = senderId;
                     p.Read(_reader);
+                    if (EditingSessionPlugin.Instance.IsPlayMode)
+                    {
+                        _backlog.AddLast(p);
+                    }
+                    else
+                    {
+                        p.Execute();
+                    }
                 }
                 else
                 {
@@ -134,6 +143,7 @@ namespace CollaboratePlugin
                 SendPacket(new UserDisconnectedPacket(User.Id));
                 User.Close();
             }
+            EditingSessionPlugin.Instance.EditorModeEnter -= ExecuteBacklog;
             _running = false;
             _writer.Close();
             _reader.Close();

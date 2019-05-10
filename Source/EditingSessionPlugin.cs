@@ -4,6 +4,7 @@ using System.Net;
 using System.Reflection;
 using FlaxEditor;
 using FlaxEditor.GUI;
+using FlaxEditor.States;
 using FlaxEngine;
 using FlaxEngine.GUI;
 using Object = FlaxEngine.Object;
@@ -20,27 +21,22 @@ namespace CollaboratePlugin
             NoSession
         }
 
+        private ContextMenuButton _collaborateButton;
+        private Label _labelConnected;
+
         public State SessionState { get; set; } = State.NoSession;
 
         public EditingSession Session;
 
-        private ContextMenuButton _collaborateButton;
-        private Label _labelConnected;
-
         public CollaborateWindow CollaborateWindow { get; private set; }
-        
+        public bool IsPlayMode { get; set; } = false;
+
+        public event Action EditorModeEnter;
+
         public Model CameraModel;
+
         public Material CameraMaterial;
-
-        private static EditingSessionPlugin _instance;
-
-        public static EditingSessionPlugin Instance
-        {
-            get => _instance;
-
-            protected set { _instance = value; }
-        }
-
+        public static EditingSessionPlugin Instance { get; protected set; }
 
         public override void InitializeEditor()
         {
@@ -60,29 +56,49 @@ namespace CollaboratePlugin
             _labelConnected.Text = "Disconnected";
 
             Editor.Undo.ActionDone += OnActionDone;
-            
+
             CameraMaterial = Content.LoadAsync<Material>(StringUtils.CombinePaths(Globals.ContentFolder, "M_RemoteCamera.flax"));
             CameraModel = Content.LoadAsyncInternal<Model>("Editor/Camera/O_Camera");
             Editor.Instance.Windows.EditWin.Viewport.RenderTask.Draw += DrawUsers;
             Scripting.Update += SendPlayerPosition;
+
+            FlaxEditorStateChanged();
+            Editor.StateMachine.StateChanged += FlaxEditorStateChanged;
         }
 
-        private object drawLocker = new object();
+        private void FlaxEditorStateChanged()
+        {
+            // Switched to play mode
+            if (Editor.StateMachine.CurrentState == Editor.StateMachine.PlayingState)
+            {
+                IsPlayMode = true;
+            }
+
+            // Switched to edit mode
+            if (Editor.StateMachine.CurrentState == Editor.StateMachine.EditingSceneState)
+            {
+                IsPlayMode = false;
+                EditorModeEnter?.Invoke();
+            }
+        }
+
+        private readonly object _drawLocker = new object();
+
         private void DrawUsers(FlaxEngine.Rendering.DrawCallsCollector collector)
         {
             if (CameraModel == null || CameraModel.LoadedLODs == 0 || Session == null)
                 return;
 
-            lock (drawLocker)
+            lock (_drawLocker)
             {
                 foreach (var user in Session.Users)
                 {
-                    if(user.Material != null)
+                    if (user.Material != null)
                         collector.AddDrawCall(CameraModel.LODs[0].Meshes[0], user.Material, ref user.Transform, StaticFlags.None, false);
                 }
             }
         }
-        
+
         private void SendPlayerPosition()
         {
             if (Session == null)
@@ -92,8 +108,8 @@ namespace CollaboratePlugin
 
             var vpos = wp.ViewPosition;
             var vrot = wp.ViewOrientation;
-            
-            if(vpos != Session.User.Position || vrot != Session.User.Orientation)
+
+            if (vpos != Session.User.Position || vrot != Session.User.Orientation)
             {
                 Session.User.Position = vpos;
                 Session.User.Orientation = vrot;
@@ -105,7 +121,8 @@ namespace CollaboratePlugin
 
         public override void Deinitialize()
         {
-            Editor.Instance.Windows.EditWin.Viewport.RenderTask.Draw -= DrawUsers;
+            var editorRenderTask = Editor.Instance?.Windows?.EditWin?.Viewport?.RenderTask;
+            if (editorRenderTask != null) editorRenderTask.Draw -= DrawUsers;
 
             Object.Destroy(CameraModel);
             Object.Destroy(CameraMaterial);
@@ -114,6 +131,7 @@ namespace CollaboratePlugin
 
             Editor.Undo.ActionDone -= OnActionDone;
             Scripting.Update -= SendPlayerPosition;
+            Editor.StateMachine.StateChanged -= FlaxEditorStateChanged;
             Session?.Close();
             Session = null;
             _collaborateButton.Dispose();
@@ -125,6 +143,9 @@ namespace CollaboratePlugin
         {
             if (Session == null)
                 return;
+
+            // Don't send actions during play mode
+            if (IsPlayMode) return;
 
             if (action is SelectionChangeAction selectionAction)
             {
