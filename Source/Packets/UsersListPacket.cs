@@ -50,11 +50,8 @@ namespace CollaboratePlugin
             {
                 EditingSessionPlugin.Instance.Session.AddUser(user);
 
-                Scripting.InvokeOnUpdate(() =>
-                {
-                    user.Outliner = Object.New<CustomOutliner>();
-                    user.Outliner.UserId = user.Id;
-                });
+                user.Outliner = Object.New<CustomOutliner>();
+                user.Outliner.UserId = user.Id;
             }
         }
     }

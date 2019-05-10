@@ -51,8 +51,7 @@ namespace CollaboratePlugin
 
             _labelConnected = Editor.UI.StatusBar.AddChild<Label>();
             _labelConnected.X = Editor.UI.StatusBar.Width - Editor.UI.StatusBar.Width * 0.3f;
-            _labelConnected.DockStyle = DockStyle.None;
-            _labelConnected.OnChildControlResized += (control) => { _labelConnected.X = Editor.UI.StatusBar.Width - Editor.UI.StatusBar.Width * 0.3f; };
+            Editor.UI.StatusBar.OnChildControlResized += ResizeLabel;
             _labelConnected.Text = "Disconnected";
 
             Editor.Undo.ActionDone += OnActionDone;
@@ -66,6 +65,11 @@ namespace CollaboratePlugin
             Editor.StateMachine.StateChanged += FlaxEditorStateChanged;
         }
 
+        private void ResizeLabel(Control control)
+        {
+            _labelConnected.X = Editor.UI.StatusBar.Width - Editor.UI.StatusBar.Width * 0.3f;
+        }
+        
         private void FlaxEditorStateChanged()
         {
             // Switched to play mode
@@ -121,6 +125,8 @@ namespace CollaboratePlugin
 
         public override void Deinitialize()
         {
+            Editor.UI.StatusBar.OnChildControlResized -= ResizeLabel;
+            
             var editorRenderTask = Editor.Instance?.Windows?.EditWin?.Viewport?.RenderTask;
             if (editorRenderTask != null) editorRenderTask.Draw -= DrawUsers;
 

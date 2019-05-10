@@ -31,12 +31,9 @@ namespace CollaboratePlugin
 
         public override void Execute()
         {
-            Scripting.InvokeOnUpdate(() =>
-            {
-                var user = EditingSessionPlugin.Instance.Session.GetUserById(Author);
-                user.Position = Position;
-                user.Orientation = Orientation;
-            });
+            var user = EditingSessionPlugin.Instance.Session.GetUserById(Author);
+            user.Position = Position;
+            user.Orientation = Orientation;
         }
     }
 }

@@ -104,7 +104,10 @@ namespace CollaboratePlugin
                     }
                     else
                     {
-                        p.Execute();
+                        Scripting.InvokeOnUpdate(() =>
+                        {
+                            p.Execute();
+                        });
                     }
                 }
                 else

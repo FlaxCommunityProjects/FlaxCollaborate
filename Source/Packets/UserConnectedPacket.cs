@@ -19,7 +19,8 @@ namespace CollaboratePlugin
         {
         }
 
-        public UserConnectedPacket(int id, String username, Color selectionColor, bool isServer, Vector3 position, Quaternion orientation)
+        public UserConnectedPacket(int id, String username, Color selectionColor, bool isServer, Vector3 position,
+            Quaternion orientation)
         {
             UserId = id;
             Username = username;
@@ -60,14 +61,12 @@ namespace CollaboratePlugin
         public override void Execute()
         {
             EditingUser user;
-            EditingSessionPlugin.Instance.Session.AddUser(user = new EditingUser(UserId, Username, SelectionColor, IsServer, Position, Orientation));
+            EditingSessionPlugin.Instance.Session.AddUser(user = new EditingUser(UserId, Username, SelectionColor,
+                IsServer, Position, Orientation));
             EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
 
-            Scripting.InvokeOnUpdate(() =>
-            {
-                user.Outliner = FlaxEngine.Object.New<CustomOutliner>();
-                user.Outliner.UserId = UserId;
-            });
+            user.Outliner = FlaxEngine.Object.New<CustomOutliner>();
+            user.Outliner.UserId = UserId;
         }
     }
 }
