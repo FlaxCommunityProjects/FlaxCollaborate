@@ -87,6 +87,11 @@ namespace CollaboratePlugin
             _users.Add(u);
         }
 
+        public void ClearUsers()
+        {
+            _users.Clear();
+        }
+        
         public void UpdateUsers(List<EditingUser> users)
         {
             _users = users;

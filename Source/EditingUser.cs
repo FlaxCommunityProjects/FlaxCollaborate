@@ -10,10 +10,10 @@ namespace CollaboratePlugin
 {
     public class EditingUser
     {
-        public int Id { get; private set; }
-        public String Name { get; private set; }
-        public bool IsServer { get; private set; }
-        public Color SelectionColor { get; private set; }
+        public int Id;
+        public String Name;
+        public bool IsServer;
+        public Color SelectionColor;
         [NoSerialize] private CustomOutliner _customOutliner;
         public CustomOutliner Outliner {
             get { return _customOutliner; }
@@ -50,6 +50,7 @@ namespace CollaboratePlugin
             get { return _orientation; }
         }
 
+        [NoSerialize]
         public Matrix Transform;
         
         public MaterialInstance Material { private set; get; }

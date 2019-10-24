@@ -1,17 +1,17 @@
 {
 	"ID": "a99237814799f8937bf1ecb3b79247ad",
 	"TypeName": "FlaxEngine.SceneAsset",
-	"EngineBuild": 6181,
+	"EngineBuild": 6186,
 	"Data": [
 		{
-			"TypeID": 9,
+			"TypeName": "FlaxEngine.Scene",
 			"ID": "a99237814799f8937bf1ecb3b79247ad",
 			"ParentID": "00000000000000000000000000000000",
 			"Name": "Scene",
 			"LightmapSettings": {}
 		},
 		{
-			"TypeID": 10,
+			"TypeName": "FlaxEngine.Sky",
 			"ID": "88edb0ab44d6ab833022c4b5ed0d24fb",
 			"ParentID": "a99237814799f8937bf1ecb3b79247ad",
 			"Name": "Sky",
@@ -25,7 +25,7 @@
 			"Sun": "a234120d4de9eaf5914c8e9e1392f66a"
 		},
 		{
-			"TypeID": 4,
+			"TypeName": "FlaxEngine.DirectionalLight",
 			"ID": "a234120d4de9eaf5914c8e9e1392f66a",
 			"ParentID": "a99237814799f8937bf1ecb3b79247ad",
 			"Name": "Sun",
@@ -45,7 +45,7 @@
 			"Brightness": 4.0
 		},
 		{
-			"TypeID": 25,
+			"TypeName": "FlaxEngine.SkyLight",
 			"ID": "c952f2b4433525722be4c18574688ec3",
 			"ParentID": "a99237814799f8937bf1ecb3b79247ad",
 			"Name": "SkyLight",
@@ -53,11 +53,16 @@
 			"CustomTexture": "c54410104ff39427bc11e5bc761d66b0"
 		},
 		{
-			"TypeID": 1,
+			"TypeName": "FlaxEngine.StaticModel",
 			"ID": "92d4335d4aabe28b2fcd24b9e9d8fb62",
 			"ParentID": "a99237814799f8937bf1ecb3b79247ad",
 			"Name": "Floor",
 			"Transform": {
+				"Translation": {
+					"X": 0.0,
+					"Y": 0.0,
+					"Z": 1.48089599609375
+				},
 				"Scale": {
 					"X": 4.0,
 					"Y": 0.5,
@@ -74,7 +79,7 @@
 			}
 		},
 		{
-			"TypeID": 2,
+			"TypeName": "FlaxEngine.Camera",
 			"ID": "33d1f2e04161243cadd66aa0878668e3",
 			"ParentID": "a99237814799f8937bf1ecb3b79247ad",
 			"Name": "Camera",
@@ -87,7 +92,7 @@
 			}
 		},
 		{
-			"TypeID": 3,
+			"TypeName": "FlaxEngine.EmptyActor",
 			"ID": "7e200e2c47307b5cd09580bb1ac95233",
 			"ParentID": "a99237814799f8937bf1ecb3b79247ad",
 			"Name": "MovableActor",
@@ -100,7 +105,7 @@
 			}
 		},
 		{
-			"TypeID": 1,
+			"TypeName": "FlaxEngine.StaticModel",
 			"ID": "093cfa91408753faa3041fad0a377362",
 			"ParentID": "7e200e2c47307b5cd09580bb1ac95233",
 			"Name": "StaticModel",

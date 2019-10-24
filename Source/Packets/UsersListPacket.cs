@@ -46,13 +46,18 @@ namespace CollaboratePlugin
 
         public override void Execute()
         {
+            Debug.Log("users count : " + UsersList.Count);
+            EditingSessionPlugin.Instance.Session.ClearUsers();
             foreach (var user in UsersList)
             {
+                
                 EditingSessionPlugin.Instance.Session.AddUser(user);
 
                 user.Outliner = Object.New<CustomOutliner>();
                 user.Outliner.UserId = user.Id;
             }
+            
+            EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Net;
 using System.Reflection;
 using FlaxEditor;
 using FlaxEditor.GUI;
+using FlaxEditor.GUI.ContextMenu;
 using FlaxEditor.States;
 using FlaxEngine;
 using FlaxEngine.GUI;
@@ -60,7 +61,7 @@ namespace CollaboratePlugin
             CameraModel = Content.LoadAsyncInternal<Model>("Editor/Camera/O_Camera");
             Editor.Instance.Windows.EditWin.Viewport.RenderTask.Draw += DrawUsers;
             Scripting.Update += SendPlayerPosition;
-
+            
             FlaxEditorStateChanged();
             Editor.StateMachine.StateChanged += FlaxEditorStateChanged;
         }

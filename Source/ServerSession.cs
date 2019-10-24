@@ -99,14 +99,16 @@ namespace CollaboratePlugin
                                 var orientation = newSocketUser.Reader.ReadQuaternion();
 
                                 newSocketUser.Writer.Write(newSocketUser.Id);
-
-                                // Send hosting user info
-                                var p = new UsersListPacket(Users);
-                                SendPacket(p);
-
+                                
                                 EditingUser newEditUser = new EditingUser(id, username, color, false, position, orientation);
                                 AddUser(newEditUser);
+                                
                                 SendPacket(id, new UserConnectedPacket(id, username, color, false, position, orientation));
+                                
+                                // Send hosting user info
+                                var p = new UsersListPacket(Users);
+                                SendPacketTo(newSocketUser.Id, p);
+
                                 Scripting.InvokeOnUpdate(() =>
                                 {
                                     EditingSessionPlugin.Instance.CollaborateWindow.Rebuild();
@@ -181,6 +183,36 @@ namespace CollaboratePlugin
             return Task.FromResult(true);
         }
 
+        public bool SendPacketTo(int userId, Packet packet)
+        {
+            string s = PacketTypeManager.SubclassTypes.First(t => packet.GetType().IsEquivalentTo(t)).Name;
+
+            foreach (var user in _socketUsers)
+            {
+                if (user.Socket != null && user.Socket.Connected && user.Id == userId)
+                {
+                    lock (user.Socket)
+                    {
+                        try
+                        {
+                            user.Writer.Write(User.Id);
+                            user.Writer.Write(s);
+                            packet.Write(user.Writer);
+                        }
+                        catch (Exception e)
+                        {
+                            // TODO: Catch the case where the user is disconnected
+                            Debug.LogException(e);
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
         public override bool SendPacket(Packet packet)
         {
             return SendPacket(User.Id, packet);

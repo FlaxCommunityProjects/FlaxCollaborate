@@ -11,7 +11,7 @@ namespace CollaboratePlugin
     {
         public event LogDelegate SendLog;
 
-        public event LogExceptionDegetae SendExceptionLog;
+        public event LogExceptionDelegate SendExceptionLog;
 
         public void Log(LogType logType, FlaxEngine.Object context, string message)
         {
