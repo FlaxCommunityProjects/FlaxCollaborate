@@ -1,1 +1,1 @@
-# FlaxAPI-Collaborate
+# FlaxCollaborate
