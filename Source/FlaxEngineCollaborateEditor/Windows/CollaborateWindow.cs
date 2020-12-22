@@ -180,49 +180,42 @@ namespace CollaboratePlugin
             _layout.ContainerControl.DisposeChildren();
             EditingSessionPlugin.Instance.SessionState = EditingSessionPlugin.State.NoSession;
 
-            int bSize = 100;
-            int emptySpace = 25;
-
-            //_layout.ContainerControl.DockStyle = DockStyle.Fill;
-            //_layout.ContainerControl.AnchorStyle = AnchorStyle.Center;
-
-            var panel = _layout.ContainerControl.AddChild<Panel>();
-            //panel.AnchorStyle = AnchorStyle.Center;
-
-            var joinButton = panel.AddChild<Button>();
-            joinButton.Text = "Join session";
-            joinButton.Width = bSize;
-            joinButton.Height = 70;
-            //joinButton.Font.Size = 10;
-            joinButton.X = panel.Width / 2 - bSize - emptySpace;
-
-            var hostButton = panel.AddChild<Button>();
-            hostButton.Text = "Host session";
-            hostButton.Width = bSize;
-            hostButton.Height = 70;
-            //hostButton.Font.Size = 10;
-            hostButton.X = panel.Width / 2 + emptySpace;
-
-            _layout.ContainerControl.SizeChanged += (size) =>
+            var p = new Panel()
             {
-                joinButton.X = panel.Width / 2 - bSize - emptySpace;
-
-                hostButton.X = panel.Width / 2 + emptySpace;
+                Parent = _layout.ContainerControl,
+                AnchorPreset = AnchorPresets.StretchAll
             };
-
-            joinButton.Clicked += () =>
+            var hp = new HorizontalPanel()
             {
-                ShowJoin();
+                Parent = p,
+                AnchorPreset = AnchorPresets.MiddleCenter,
+                Height = 70,
+                Spacing = 15
             };
-
-            hostButton.Clicked += () =>
+            
+            var joinButton = new Button()
             {
-                ShowHost();
+                Parent = hp,
+                Text = "   Join   ",
+                Width = 120,
+                AnchorPreset = AnchorPresets.MiddleCenter
             };
+            joinButton.Clicked += () => ShowJoin();
+            var hostButton = new Button()
+            {
+                Parent = hp,
+                Text = "   Host   ",
+                Width = 120,
+                AnchorPreset = AnchorPresets.MiddleCenter
+            };
+            hostButton.Clicked += () => ShowHost();
+            hp.Location -= hp.Size / 2;
         }
 
         public void Rebuild()
         {
+            if (Window != null)
+                Window.Title = "Collaborate";
             switch (EditingSessionPlugin.Instance.SessionState)
             {
                 case EditingSessionPlugin.State.Join:
