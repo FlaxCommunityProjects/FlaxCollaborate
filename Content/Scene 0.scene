@@ -1,0 +1,99 @@
+{
+	"ID": "5382fb9f43a4852500576aae4a074247",
+	"TypeName": "FlaxEngine.SceneAsset",
+	"EngineBuild": 6214,
+	"Data": [
+		{
+			"ID": "5382fb9f43a4852500576aae4a074247",
+			"TypeName": "FlaxEngine.Scene",
+			"LightmapSettings": {
+				"IndirectLightingIntensity": 1.0,
+				"GlobalObjectsScale": 1.0,
+				"ChartsPadding": 3,
+				"AtlasSize": 1024,
+				"BounceCount": 1,
+				"CompressLightmaps": true,
+				"UseGeometryWithNoMaterials": true,
+				"Quality": 10
+			}
+		},
+		{
+			"ID": "7ce008ac4bd05a738998929813485003",
+			"TypeName": "FlaxEngine.DirectionalLight",
+			"ParentID": "5382fb9f43a4852500576aae4a074247",
+			"Name": "Sun",
+			"Transform": {
+				"Translation": {
+					"X": 40.0,
+					"Y": 160.0,
+					"Z": 0.0
+				},
+				"Orientation": {
+					"X": 0.3826834559440613,
+					"Y": 0.0,
+					"Z": 0.0,
+					"W": 0.9238795042037964
+				}
+			}
+		},
+		{
+			"ID": "dc2d37f84d5b9364137039af535cdc84",
+			"TypeName": "FlaxEngine.Sky",
+			"ParentID": "5382fb9f43a4852500576aae4a074247",
+			"Name": "Sky",
+			"Transform": {
+				"Translation": {
+					"X": 40.0,
+					"Y": 150.0,
+					"Z": 0.0
+				}
+			},
+			"Sun": "7ce008ac4bd05a738998929813485003"
+		},
+		{
+			"ID": "8223ccef44d87dc640602bb0aaa1e4f6",
+			"TypeName": "FlaxEngine.SkyLight",
+			"ParentID": "5382fb9f43a4852500576aae4a074247",
+			"Name": "SkyLight",
+			"Brightness": 2.5,
+			"CustomTexture": "c54410104ff39427bc11e5bc761d66b0"
+		},
+		{
+			"ID": "bab473d94781bda28bbbd384a1c3f2f2",
+			"TypeName": "FlaxEngine.StaticModel",
+			"ParentID": "5382fb9f43a4852500576aae4a074247",
+			"Name": "Floor",
+			"Transform": {
+				"Scale": {
+					"X": 4.0,
+					"Y": 0.5,
+					"Z": 4.0
+				}
+			},
+			"Model": "b43f0f8f4aaba3f3156896a5a22ba493",
+			"Buffer": {
+				"Entries": [
+					{
+						"Material": "1771b53343d461faacdf2c8581b1fdbb",
+						"ShadowsMode": 3,
+						"Visible": true,
+						"ReceiveDecals": true
+					}
+				]
+			}
+		},
+		{
+			"ID": "ae70bc3141e2fd403508f2866afe3967",
+			"TypeName": "FlaxEngine.Camera",
+			"ParentID": "5382fb9f43a4852500576aae4a074247",
+			"Name": "Camera",
+			"Transform": {
+				"Translation": {
+					"X": 0.0,
+					"Y": 150.0,
+					"Z": -300.0
+				}
+			}
+		}
+	]
+}

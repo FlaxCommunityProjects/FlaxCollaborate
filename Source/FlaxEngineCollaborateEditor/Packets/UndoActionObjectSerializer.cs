@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using FlaxEditor.History;
+using FlaxEditor.Scripting;
 using FlaxEditor.Utilities;
 using FlaxEngine;
 
@@ -17,13 +18,15 @@ namespace CollaboratePlugin
             public object TargetInstance;
             public string Data;
 
-            // TODO: ActionString
+            // TODO: ActionString, this one is tricky since you have to get the backing field
 
+            // See FlaxEditor.Utilities.MemberInfoPath
             public SerializedStackEntry[][] MemberStacks;
 
             public class SerializedStackEntry
             {
-                public int Index;
+                public object Index;
+
                 public Type MemberInfoType;
                 public string AssemblyQualifiedName;
                 public string Path;
@@ -41,50 +44,6 @@ namespace CollaboratePlugin
 
         private static readonly FieldInfo DataField
             = typeof(UndoActionObject).GetField("_data", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        public static UndoActionObject FromJson(string json)
-        {
-            //
-            // Here be dragons. Thou art forewarned
-            //
-            var serialized = FlaxEngine.Json.JsonSerializer.Deserialize<SerializedUndoActionObject>(json);
-
-            UndoActionObject undoActionObject = (UndoActionObject)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(UndoActionObject));
-
-            TargetInstanceField.SetValue(undoActionObject, serialized.TargetInstance);
-            DataField.SetValue(undoActionObject, serialized.Data);
-
-            var memberInfoPaths = new MemberInfoPath[serialized.MemberStacks.Length];
-            for (int i = 0; i < memberInfoPaths.Length; i++)
-            {
-                // Prepare the stack entries
-                var entries = new MemberInfoPath.Entry[serialized.MemberStacks[i].Length];
-                for (int j = 0; j < entries.Length; j++)
-                {
-                    var serializedEntry = serialized.MemberStacks[i][j];
-                    Type type = Type.GetType(serializedEntry.AssemblyQualifiedName);
-                    MemberInfo memberInfo;
-                    if (serializedEntry.MemberInfoType == typeof(FieldInfo))
-                    {
-                        memberInfo = type.GetField(serializedEntry.Path);
-                    }
-                    else
-                    {
-                        memberInfo = type.GetProperty(serializedEntry.Path);
-                    }
-
-                    entries[j] = new MemberInfoPath.Entry(memberInfo, serializedEntry.Index);
-                }
-
-                // MemberInfoPath is a struct, we have to jump through some hoops to set a private field
-                object boxedMemberInfoPath = memberInfoPaths[i];
-                StackField.SetValue(boxedMemberInfoPath, entries);
-                memberInfoPaths[i] = (MemberInfoPath)boxedMemberInfoPath;
-            }
-            MembersField.SetValue(undoActionObject, memberInfoPaths);
-
-            return undoActionObject;
-        }
 
         public static string ToJson(UndoActionObject undoActionObject)
         {
@@ -120,28 +79,88 @@ namespace CollaboratePlugin
                 {
                     serialized.MemberStacks[i][j] = new SerializedUndoActionObject.SerializedStackEntry();
 
-                    if (stack[j].Member is FieldInfo)
+                    if (stack[j].Member.IScriptMemberInfo != null)
+                    {
+                        Debug.LogError("Serializing IScriptMemberInfo not supported");
+                    }
+
+                    if (stack[j].Member.Type is MethodInfo)
+                    {
+                        serialized.MemberStacks[i][j].MemberInfoType = typeof(MethodInfo);
+                    }
+                    else if (stack[j].Member.Type is FieldInfo)
                     {
                         serialized.MemberStacks[i][j].MemberInfoType = typeof(FieldInfo);
                     }
-                    else if (stack[j].Member is PropertyInfo)
+                    else if (stack[j].Member.Type is PropertyInfo)
                     {
                         serialized.MemberStacks[i][j].MemberInfoType = typeof(PropertyInfo);
                     }
                     else
                     {
-                        throw new Exception("Unexpected entry.Member type: " + stack[j].Member?.DeclaringType.AssemblyQualifiedName);
+                        throw new Exception("Unexpected entry.Member.Type: " + stack[j].Member.Type?.DeclaringType?.AssemblyQualifiedName);
                     }
 
-                    //entry.MemberInfo --> .DeclaringType.AssemblyQualifiedName, .Name
 
-                    serialized.MemberStacks[i][j].AssemblyQualifiedName = stack[j].Member.DeclaringType.AssemblyQualifiedName;
+                    // serialized.MemberStacks[i][j].AssemblyQualifiedName = stack[j].Member.DeclaringType.AssemblyQualifiedName;
                     serialized.MemberStacks[i][j].Path = stack[j].Member.Name;
                     serialized.MemberStacks[i][j].Index = stack[j].Index;
                 }
             }
 
             return FlaxEngine.Json.JsonSerializer.Serialize(serialized);
+        }
+
+        public static UndoActionObject FromJson(string json)
+        {
+            //
+            // Here be dragons. Thou art forewarned
+            //
+            var serialized = FlaxEngine.Json.JsonSerializer.Deserialize<SerializedUndoActionObject>(json);
+
+            UndoActionObject undoActionObject = (UndoActionObject)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(UndoActionObject));
+
+            TargetInstanceField.SetValue(undoActionObject, serialized.TargetInstance);
+            DataField.SetValue(undoActionObject, serialized.Data);
+
+            var memberInfoPaths = new MemberInfoPath[serialized.MemberStacks.Length];
+            for (int i = 0; i < memberInfoPaths.Length; i++)
+            {
+                // Prepare the stack entries
+                var entries = new MemberInfoPath.Entry[serialized.MemberStacks[i].Length];
+                for (int j = 0; j < entries.Length; j++)
+                {
+                    var serializedEntry = serialized.MemberStacks[i][j];
+                    Type type = Type.GetType(serializedEntry.AssemblyQualifiedName);
+                    MemberInfo memberInfo;
+                    if (serializedEntry.MemberInfoType == typeof(MethodInfo))
+                    {
+                        memberInfo = type.GetMethod(serializedEntry.Path);
+                    }
+                    else if (serializedEntry.MemberInfoType == typeof(FieldInfo))
+                    {
+                        memberInfo = type.GetField(serializedEntry.Path);
+                    }
+                    else if (serializedEntry.MemberInfoType == typeof(PropertyInfo))
+                    {
+                        memberInfo = type.GetProperty(serializedEntry.Path);
+                    }
+                    else
+                    {
+                        throw new Exception("Unexpected MemberInfoType: " + serializedEntry.MemberInfoType);
+                    }
+
+                    entries[j] = new MemberInfoPath.Entry(new ScriptMemberInfo(memberInfo), serializedEntry.Index);
+                }
+
+                // MemberInfoPath is a struct, we have to jump through some hoops to set a private field
+                object boxedMemberInfoPath = memberInfoPaths[i];
+                StackField.SetValue(boxedMemberInfoPath, entries);
+                memberInfoPaths[i] = (MemberInfoPath)boxedMemberInfoPath;
+            }
+            MembersField.SetValue(undoActionObject, memberInfoPaths);
+
+            return undoActionObject;
         }
     }
 }

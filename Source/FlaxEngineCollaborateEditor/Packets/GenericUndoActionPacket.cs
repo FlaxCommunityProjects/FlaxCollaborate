@@ -110,7 +110,7 @@ namespace CollaboratePlugin
             FlaxEngine.Json.JsonSerializer.Deserialize(undoAction, data);
 
             // Special deserialisation cases for a few undo actions
-            if (undoAction is DeleteActorsAction deleteAction)
+            /*if (undoAction is DeleteActorsAction deleteAction)
             {
                 // Get node parents
                 FieldInfo nodeParentsField = typeof(DeleteActorsAction).GetField("_nodeParents", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -138,7 +138,8 @@ namespace CollaboratePlugin
                     actorNodes.BuildNodesParents(nodeParents);
                 }
             }
-            else if (undoAction is SelectionChangeAction selectionChangeAction)
+            else*/
+            if (undoAction is SelectionChangeAction selectionChangeAction)
             {
                 // Selection change action custom handling
                 var callbackProp = typeof(SelectionChangeAction).GetField("_callback",
@@ -221,8 +222,8 @@ namespace CollaboratePlugin
             {
                 // Don't execute the action, instead do stuff
                 // TODO: What if some action depends on the current selection?
-                EditingSessionPlugin.Instance.Session.GetUserById(Author).Selection =
-                    selectionChangeAction.Data.After;
+                EditingSessionPlugin.Instance.Session.GetUserById(Author).Selection.Clear();
+                EditingSessionPlugin.Instance.Session.GetUserById(Author).Selection.AddRange(selectionChangeAction.Data.After);
             }
             else
             {

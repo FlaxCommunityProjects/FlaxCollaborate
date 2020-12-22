@@ -52,16 +52,16 @@ namespace CollaboratePlugin
 
             _labelConnected = Editor.UI.StatusBar.AddChild<Label>();
             _labelConnected.X = Editor.UI.StatusBar.Width - Editor.UI.StatusBar.Width * 0.3f;
-            Editor.UI.StatusBar.OnChildControlResized += ResizeLabel;
+            Editor.UI.StatusBar.SizeChanged += ResizeLabel;
             _labelConnected.Text = "Disconnected";
 
             Editor.Undo.ActionDone += OnActionDone;
 
-            CameraMaterial = Content.LoadAsync<Material>(StringUtils.CombinePaths(Globals.ContentFolder, "M_RemoteCamera.flax"));
+            CameraMaterial = Content.LoadAsyncInternal<Material>("Engine/SingleColorMaterial");
             CameraModel = Content.LoadAsyncInternal<Model>("Editor/Camera/O_Camera");
-            Editor.Instance.Windows.EditWin.Viewport.RenderTask.Draw += DrawUsers;
+            Editor.Instance.Windows.EditWin.Viewport.RenderTask.CollectDrawCalls += DrawUsers;
             Scripting.Update += SendPlayerPosition;
-            
+
             FlaxEditorStateChanged();
             Editor.StateMachine.StateChanged += FlaxEditorStateChanged;
         }
@@ -70,7 +70,7 @@ namespace CollaboratePlugin
         {
             _labelConnected.X = Editor.UI.StatusBar.Width - Editor.UI.StatusBar.Width * 0.3f;
         }
-        
+
         private void FlaxEditorStateChanged()
         {
             // Switched to play mode
@@ -89,17 +89,19 @@ namespace CollaboratePlugin
 
         private readonly object _drawLocker = new object();
 
-        private void DrawUsers(FlaxEngine.Rendering.DrawCallsCollector collector)
+        private void DrawUsers(RenderContext renderContext)
         {
-            if (CameraModel == null || CameraModel.LoadedLODs == 0 || Session == null)
+            if (!CameraModel || !CameraModel.IsLoaded || CameraModel.LoadedLODs == 0 || Session == null)
                 return;
 
             lock (_drawLocker)
             {
                 foreach (var user in Session.Users)
                 {
-                    if (user.Material != null)
-                        collector.AddDrawCall(CameraModel.LODs[0].Meshes[0], user.Material, ref user.Transform, StaticFlags.None, false);
+                    if (user.Material)
+                    {
+                        CameraModel.LODs[0].Meshes[0].Draw(ref renderContext, user.Material, ref user.Transform, StaticFlags.None, false);
+                    }
                 }
             }
         }
@@ -126,19 +128,17 @@ namespace CollaboratePlugin
 
         public override void Deinitialize()
         {
-            Editor.UI.StatusBar.OnChildControlResized -= ResizeLabel;
-            
-            var editorRenderTask = Editor.Instance?.Windows?.EditWin?.Viewport?.RenderTask;
-            if (editorRenderTask != null) editorRenderTask.Draw -= DrawUsers;
-
-            Object.Destroy(CameraModel);
-            Object.Destroy(CameraMaterial);
-
-            Session.Close();
-
+            Editor.UI.StatusBar.SizeChanged -= ResizeLabel;
             Editor.Undo.ActionDone -= OnActionDone;
             Scripting.Update -= SendPlayerPosition;
             Editor.StateMachine.StateChanged -= FlaxEditorStateChanged;
+
+            var editorRenderTask = Editor.Instance?.Windows?.EditWin?.Viewport?.RenderTask;
+            if (editorRenderTask != null) editorRenderTask.CollectDrawCalls -= DrawUsers;
+
+            Object.Destroy(ref CameraModel);
+            Object.Destroy(ref CameraMaterial);
+
             Session?.Close();
             Session = null;
             _collaborateButton.Dispose();

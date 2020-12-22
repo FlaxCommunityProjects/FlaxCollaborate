@@ -6,7 +6,6 @@ using FlaxEditor.GUI;
 using FlaxEditor.Windows;
 using FlaxEngine;
 using FlaxEngine.GUI;
-using FlaxEngine.Rendering;
 using FlaxEngine.Utilities;
 
 namespace CollaboratePlugin
@@ -26,12 +25,14 @@ namespace CollaboratePlugin
         private void ShowJoin()
         {
             _layout.ContainerControl.DisposeChildren();
-            _layout.ContainerControl.AnchorStyle = AnchorStyle.Upper;
+            //_layout.ContainerControl.AnchorStyle = AnchorStyle.Upper;
             EditingSessionPlugin.Instance.SessionState = EditingSessionPlugin.State.Join;
             _layout.ClearLayout();
             _layout.Space(5);
             var label = _layout.Label("Joining Session", TextAlignment.Center);
-            label.Label.Font.Size = 11;
+            var fontReference = label.Label.Font;
+            fontReference.Size = 11;
+            label.Label.Font = fontReference;
             _layout.Space(5);
 
             var clientSettingsEditor = new CustomEditorPresenter(null);
@@ -60,12 +61,14 @@ namespace CollaboratePlugin
         private void ShowHost()
         {
             _layout.ContainerControl.DisposeChildren();
-            _layout.ContainerControl.AnchorStyle = AnchorStyle.Upper;
+            //_layout.ContainerControl.AnchorStyle = AnchorStyle.Upper;
             EditingSessionPlugin.Instance.SessionState = EditingSessionPlugin.State.Host;
             _layout.ClearLayout();
             _layout.Space(5);
             var label = _layout.Label("Hosting Session", TextAlignment.Center);
-            label.Label.Font.Size = 11;
+            var fontReference = label.Label.Font;
+            fontReference.Size = 11;
+            label.Label.Font = fontReference;
             _layout.Space(5);
 
             var serverSettingsEditor = new CustomEditorPresenter(null);
@@ -105,57 +108,57 @@ namespace CollaboratePlugin
             var vpanel = _layout.ContainerControl.AddChild<VerticalPanel>();
 
             vpanel.Width = _layout.ContainerControl.Width;
-            
+
             var userDropPanel = vpanel.AddChild<DropPanel>();
             userDropPanel.HeaderText = "Users List";
             userDropPanel.EnableDropDownIcon = true;
             userDropPanel.Width = vpanel.Width;
-            
+
             var userTable = userDropPanel.AddChild<Table>();
             userTable.Width = userDropPanel.Width;
-            
+
             var nameDef = new ColumnDefinition();
             nameDef.Title = "Display Name";
             nameDef.CellAlignment = TextAlignment.Near;
             nameDef.TitleBackgroundColor = tableHeaderColor;
-            
+
             var actionDef = new ColumnDefinition();
             actionDef.Title = "Actions";
             actionDef.CellAlignment = TextAlignment.Near;
             actionDef.TitleBackgroundColor = tableHeaderColor;
-            
-            userTable.Columns = new[] {nameDef, actionDef};
-            
+
+            userTable.Columns = new[] { nameDef, actionDef };
+
             EditingSessionPlugin.Instance.Session.Users.ForEach((user) =>
             {
                 var name = user.Name;
-                
+
                 if (user.IsServer)
                     name += " (Server)";
-                
+
                 if (user.Id == EditingSessionPlugin.Instance.Session.User.Id)
                     name += " (You)";
-                
+
                 var row = new Row()
                 {
                     Values = new object[]
                     {
-                        user.Name,
-                        "No actions"
+                          user.Name,
+                          "No actions"
                     },
                     Parent = userTable,
-                    
+
                 };
             });
-            
+
             var history = vpanel.AddChild<DropPanel>();
             history.HeaderText = "History";
             history.EnableDropDownIcon = true;
-            
+
             var settings = vpanel.AddChild<DropPanel>();
             settings.HeaderText = "Settings";
             settings.EnableDropDownIcon = true;
-            
+
             var p = vpanel.AddChild<Panel>();
             p.BackgroundColor = Color.Transparent;
             p.Height = 10;
@@ -180,24 +183,24 @@ namespace CollaboratePlugin
             int bSize = 100;
             int emptySpace = 25;
 
-            _layout.ContainerControl.DockStyle = DockStyle.Fill;
-            _layout.ContainerControl.AnchorStyle = AnchorStyle.Center;
+            //_layout.ContainerControl.DockStyle = DockStyle.Fill;
+            //_layout.ContainerControl.AnchorStyle = AnchorStyle.Center;
 
             var panel = _layout.ContainerControl.AddChild<Panel>();
-            panel.AnchorStyle = AnchorStyle.Center;
+            //panel.AnchorStyle = AnchorStyle.Center;
 
             var joinButton = panel.AddChild<Button>();
             joinButton.Text = "Join session";
             joinButton.Width = bSize;
             joinButton.Height = 70;
-            joinButton.Font.Size = 10;
+            //joinButton.Font.Size = 10;
             joinButton.X = panel.Width / 2 - bSize - emptySpace;
 
             var hostButton = panel.AddChild<Button>();
             hostButton.Text = "Host session";
             hostButton.Width = bSize;
             hostButton.Height = 70;
-            hostButton.Font.Size = 10;
+            //hostButton.Font.Size = 10;
             hostButton.X = panel.Width / 2 + emptySpace;
 
             _layout.ContainerControl.SizeChanged += (size) =>
@@ -222,21 +225,21 @@ namespace CollaboratePlugin
         {
             switch (EditingSessionPlugin.Instance.SessionState)
             {
-            case EditingSessionPlugin.State.Join:
-                ShowJoin();
-                break;
+                case EditingSessionPlugin.State.Join:
+                    ShowJoin();
+                    break;
 
-            case EditingSessionPlugin.State.Host:
-                ShowHost();
-                break;
+                case EditingSessionPlugin.State.Host:
+                    ShowHost();
+                    break;
 
-            case EditingSessionPlugin.State.Session:
-                ShowSession();
-                break;
+                case EditingSessionPlugin.State.Session:
+                    ShowSession();
+                    break;
 
-            case EditingSessionPlugin.State.NoSession:
-                ShowNoSession();
-                break;
+                case EditingSessionPlugin.State.NoSession:
+                    ShowNoSession();
+                    break;
             }
         }
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using FlaxEditor;
 using FlaxEditor.Gizmo;
 using FlaxEditor.SceneGraph;
@@ -15,7 +16,8 @@ namespace CollaboratePlugin
         public bool IsServer;
         public Color SelectionColor;
         [NoSerialize] private CustomOutliner _customOutliner;
-        public CustomOutliner Outliner {
+        public CustomOutliner Outliner
+        {
             get { return _customOutliner; }
             set
             {
@@ -23,9 +25,9 @@ namespace CollaboratePlugin
                 _customOutliner = value;
                 Editor.Instance.Windows.EditWin.Viewport.Task.CustomPostFx.Add(value);
             }
-            
+
         }
-        public SceneGraphNode[] Selection { set; get; }
+        public List<SceneGraphNode> Selection { get; } = new List<SceneGraphNode>();
 
         private Vector3 _position;
         public Vector3 Position
@@ -33,7 +35,7 @@ namespace CollaboratePlugin
             set
             {
                 _position = value;
-                Transform = Matrix.Transformation(Vector3.One, Orientation * Quaternion.RotationY(-90 * Mathf.Deg2Rad), Position);
+                Transform = Matrix.Transformation(Vector3.One, Orientation * Quaternion.RotationY(-90 * Mathf.DegreesToRadians), Position);
             }
             get { return _position; }
         }
@@ -45,16 +47,16 @@ namespace CollaboratePlugin
             set
             {
                 _orientation = value;
-                Transform = Matrix.Transformation(Vector3.One, Orientation * Quaternion.RotationY(-90 * Mathf.Deg2Rad), Position);
+                Transform = Matrix.Transformation(Vector3.One, Orientation * Quaternion.RotationY(-90 * Mathf.DegreesToRadians), Position);
             }
             get { return _orientation; }
         }
 
         [NoSerialize]
         public Matrix Transform;
-        
+
         public MaterialInstance Material { private set; get; }
-        
+
         public EditingUser(int id, string username, Color selectionColor, bool server, Vector3 position, Quaternion orientation)
         {
             Id = id;
@@ -63,11 +65,12 @@ namespace CollaboratePlugin
             SelectionColor = selectionColor;
             Position = position;
             Orientation = orientation;
-            
+
             Scripting.InvokeOnUpdate(() =>
             {
+                EditingSessionPlugin.Instance.CameraMaterial.WaitForLoaded();
                 Material = EditingSessionPlugin.Instance.CameraMaterial.CreateVirtualInstance();
-                Material.GetParam("Color").Value = SelectionColor;
+                Material.SetParameterValue("Color", SelectionColor);
             });
         }
 

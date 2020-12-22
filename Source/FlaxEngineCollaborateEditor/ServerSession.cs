@@ -29,7 +29,7 @@ namespace CollaboratePlugin
         private TcpListener _server;
         private List<SocketUser> _socketUsers = new List<SocketUser>();
         private Thread _thread;
-        private ILogger Logger = new Logger(new SelectiveLogHandler()) { FilterLogType = LogType.Log }; // Custom logger
+        private ILogger Logger = new Logger(new SelectiveLogHandler()) { FilterLogType = LogType.Info }; // Custom logger
 
         public override bool IsHosting => true;
 
@@ -99,12 +99,12 @@ namespace CollaboratePlugin
                                 var orientation = newSocketUser.Reader.ReadQuaternion();
 
                                 newSocketUser.Writer.Write(newSocketUser.Id);
-                                
+
                                 EditingUser newEditUser = new EditingUser(id, username, color, false, position, orientation);
                                 AddUser(newEditUser);
-                                
+
                                 SendPacket(id, new UserConnectedPacket(id, username, color, false, position, orientation));
-                                
+
                                 // Send hosting user info
                                 var p = new UsersListPacket(Users);
                                 SendPacketTo(newSocketUser.Id, p);
@@ -212,7 +212,7 @@ namespace CollaboratePlugin
 
             return false;
         }
-        
+
         public override bool SendPacket(Packet packet)
         {
             return SendPacket(User.Id, packet);
