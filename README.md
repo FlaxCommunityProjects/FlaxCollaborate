@@ -1,3 +1,3 @@
 # FlaxCollaborate
 
-A little plugin that lets multiple people edit the same scene simultaneously
+A little plugin that let multiple peoples edit the same scene simultaneously.
